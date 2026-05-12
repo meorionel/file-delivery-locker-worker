@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "file-delivery-locker",
+	"name": "file-delivery-locker-worker-demo",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2026-05-09",
 	"compatibility_flags": [
