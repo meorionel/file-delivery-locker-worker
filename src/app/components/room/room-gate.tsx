@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { PickupCodeInput } from "@/app/components/pickup-code-input";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 
 type Props = {
-  busy: boolean;
   demoMode: boolean;
-  onCreateRoom: (code: string, joinToken: string) => void;
-  onJoinRoom: (code: string, joinToken: string) => void;
 };
 
-export function RoomGate({ busy, demoMode, onCreateRoom, onJoinRoom }: Props) {
+export function RoomGate({ demoMode }: Props) {
+  const router = useRouter();
   const { t } = useI18n();
   const [joinCode, setJoinCode] = useState("");
   const [creating, setCreating] = useState(false);
@@ -40,7 +39,7 @@ export function RoomGate({ busy, demoMode, onCreateRoom, onJoinRoom }: Props) {
         throw new Error(joinData.error ?? t("message.roomJoinFailed"));
       }
 
-      onCreateRoom(data.code, joinData.joinToken);
+      router.push(`/room/${encodeURIComponent(data.code)}?token=${encodeURIComponent(joinData.joinToken)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("message.roomCreateFailed"));
     } finally {
@@ -68,7 +67,7 @@ export function RoomGate({ busy, demoMode, onCreateRoom, onJoinRoom }: Props) {
         throw new Error(data.error ?? t("message.roomJoinFailed"));
       }
 
-      onJoinRoom(code, data.joinToken);
+      router.push(`/room/${encodeURIComponent(code)}?token=${encodeURIComponent(data.joinToken)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("message.roomJoinFailed"));
     } finally {
@@ -82,7 +81,7 @@ export function RoomGate({ busy, demoMode, onCreateRoom, onJoinRoom }: Props) {
         <button
           type="button"
           className="primary-button"
-          disabled={creating || busy || demoMode}
+          disabled={creating || demoMode}
           onClick={handleCreate}
         >
           {creating ? t("room.creating") : t("room.createRoom")}
@@ -93,11 +92,11 @@ export function RoomGate({ busy, demoMode, onCreateRoom, onJoinRoom }: Props) {
 
       <div className="room-gate-section">
         <label className="field-label">{t("room.roomCode")}</label>
-        <PickupCodeInput value={joinCode} onChange={setJoinCode} disabled={joining || busy || demoMode} />
+        <PickupCodeInput value={joinCode} onChange={setJoinCode} disabled={joining || demoMode} />
         <button
           type="button"
           className="secondary-button"
-          disabled={joining || busy || demoMode || joinCode.replace(/[^A-Za-z0-9]/g, "").length !== 6}
+          disabled={joining || demoMode || joinCode.replace(/[^A-Za-z0-9]/g, "").length !== 6}
           onClick={handleJoin}
           style={{ marginTop: "0.75rem" }}
         >

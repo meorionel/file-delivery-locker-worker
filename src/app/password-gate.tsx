@@ -8,7 +8,7 @@ type AuthResponse = {
 	error?: string;
 };
 
-export default function PasswordGate() {
+export default function PasswordGate({ redirectTo }: { redirectTo?: string }) {
 	const { t } = useI18n();
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
@@ -32,7 +32,7 @@ export default function PasswordGate() {
 				throw new Error(t("auth.passwordIncorrect"));
 			}
 
-			window.location.reload();
+			window.location.href = redirectTo ?? "/";
 		} catch (authError) {
 			setError(authError instanceof Error ? authError.message : t("auth.passwordIncorrect"));
 		} finally {

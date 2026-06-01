@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { getDemoMode, getSiteAuthSession, getSitePassword, SITE_AUTH_COOKIE } from "@/lib/locker";
 import LockerApp from "./locker-app";
-import PasswordGate from "./password-gate";
 
 export default async function Home() {
 	const demoMode = await getDemoMode();
@@ -15,7 +15,7 @@ export default async function Home() {
 	const session = await getSiteAuthSession(sitePassword, token);
 
 	if (!session.valid) {
-		return <PasswordGate />;
+		redirect("/auth");
 	}
 
 	return <LockerApp csrfToken={session.csrfToken} demoMode={demoMode} />;

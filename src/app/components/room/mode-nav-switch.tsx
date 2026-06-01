@@ -1,15 +1,16 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useI18n } from "@/app/i18n";
 
 type Props = {
-  value: "locker" | "room";
-  onChange: (mode: "locker" | "room") => void;
+  currentMode: "locker" | "room";
 };
 
-export function TransferModeSwitch({ value, onChange }: Props) {
+export function ModeNavSwitch({ currentMode }: Props) {
   const { t } = useI18n();
-  const isRoom = value === "room";
+  const router = useRouter();
+  const isRoom = currentMode === "room";
 
   return (
     <div className="room-switch-wrap">
@@ -22,7 +23,7 @@ export function TransferModeSwitch({ value, onChange }: Props) {
         role="switch"
         aria-checked={isRoom}
         aria-label={t("room.modeSwitch")}
-        onClick={() => onChange(isRoom ? "locker" : "room")}
+        onClick={() => router.push(isRoom ? "/" : "/room")}
       >
         <span className={`switch-thumb ${isRoom ? "switch-thumb-on" : ""}`} />
       </button>
