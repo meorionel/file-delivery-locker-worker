@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LanguageProvider } from "./i18n";
+import { ModeNavSwitch } from "./components/mode-nav-switch";
 import { SiteFooter } from "./components/site-footer";
 import "./globals.css";
 import "./styles/layout.css";
@@ -28,6 +29,9 @@ export default function RootLayout({
 			</head>
 			<body>
 				<LanguageProvider>
+					<div className="mx-auto w-full max-w-[1200px] px-5 pt-6 sm:px-8 min-[960px]:px-10 max-sm:pt-4">
+						<ModeNavSwitch />
+					</div>
 					{children}
 					<SiteFooter />
 				</LanguageProvider>

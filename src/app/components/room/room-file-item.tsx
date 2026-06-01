@@ -2,6 +2,7 @@
 
 import { formatBytes, formatTime } from "@/app/components/locker-format";
 import { useI18n } from "@/app/i18n";
+import { Badge } from "@/app/components/ui/badge";
 import type { RoomFile } from "./room-types";
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
 };
 
 export function RoomFileItem({ file, onDownload, onPreview }: Props) {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
 
   function handleClick() {
     if (file.kind === "text") {
@@ -25,9 +26,9 @@ export function RoomFileItem({ file, onDownload, onPreview }: Props) {
     <button type="button" className="room-file-row" onClick={handleClick}>
       <span className="room-file-name">{file.fileName}</span>
       <span className="room-file-kind">
-        <span className="badge-coral">
+        <Badge variant="coral">
           {file.kind === "text" ? "TXT" : "FILE"}
-        </span>
+        </Badge>
       </span>
       <span className="room-file-size">{formatBytes(file.size)}</span>
       <span className="room-file-time">{formatTime(file.createdAt, locale)}</span>

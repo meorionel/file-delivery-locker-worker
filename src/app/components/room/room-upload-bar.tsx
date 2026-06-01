@@ -3,6 +3,7 @@
 import { type FormEvent, useRef, useState } from "react";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
+import { PrimaryButton } from "@/app/components/ui/button";
 import type { DeliveryKind, UploadFileResult } from "./room-types";
 
 type Props = {
@@ -136,9 +137,9 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
         </div>
       )}
 
-      <button type="submit" className="primary-button" disabled={uploading}>
+      <PrimaryButton type="submit" disabled={uploading}>
         {uploading ? t("upload.uploading") : kind === "text" ? t("room.uploadText") : t("room.uploadFile")}
-      </button>
+      </PrimaryButton>
 
       {error && <p className="room-upload-error">{error}</p>}
     </form>

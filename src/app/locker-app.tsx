@@ -4,10 +4,13 @@ import {
 	type FormEvent,
 	useEffect,
 	useMemo,
-	useRef,
 	useState,
 } from "react";
 import { GooeyToaster, gooeyToast } from "goey-toast";
+import { getDownloadFileName } from "@/lib/file";
+import { csrfHeaders } from "@/lib/csrf";
+import { solvePowToken } from "@/lib/pow";
+import { notify } from "@/lib/notify";
 import { useI18n } from "./i18n";
 import { AdminPanel } from "./components/admin-panel";
 import { readApiJson } from "./components/api-json";
@@ -23,7 +26,6 @@ import type {
 } from "./components/locker-types";
 import { PickupPanel } from "./components/pickup-panel";
 import { StatsLockup } from "./components/stats-lockup";
-import { ModeNavSwitch } from "./components/room/mode-nav-switch";
 import { UploadPanel } from "./components/upload-panel";
 
 const MAX_TEXT_SIZE = 256 * 1024;
@@ -56,7 +58,6 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 	const [powStatus, setPowStatus] = useState("");
 	const [stats, setStats] = useState<SiteStats | null>(null);
 	const [busy, setBusy] = useState<"upload" | "lookup" | "download" | "revoke" | null>(null);
-	const capProgressRef = useRef<(progress: number) => void>(() => undefined);
 
 	const selectedFileSize = useMemo(() => (file ? formatBytes(file.size) : t("upload.notSelected")), [file, t]);
 	const textSize = useMemo(() => formatBytes(new TextEncoder().encode(textContent).length), [textContent]);
@@ -74,27 +75,6 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 	useEffect(() => {
 		void loadStats();
 	}, []);
-
-	function notify(message: string, type: "default" | "success" | "error" | "warning" = "default") {
-		const options = { preset: "subtle" as const, showTimestamp: false, showProgress: true };
-
-		if (type === "success") {
-			gooeyToast.success(message, options);
-			return;
-		}
-
-		if (type === "error") {
-			gooeyToast.error(message, options);
-			return;
-		}
-
-		if (type === "warning") {
-			gooeyToast.warning(message, options);
-			return;
-		}
-
-		gooeyToast(message, options);
-	}
 
 	async function importTextFile(nextFile: File | null) {
 		if (!nextFile) {
@@ -238,7 +218,7 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 		setBusy("lookup");
 		setPowStatus(t("message.powInitial"));
 		try {
-			const capToken = await solvePowToken((progress) => {
+			const capToken = await solvePowToken(t, (progress) => {
 				setPowStatus(t("message.powProgress", { progress: Math.round(progress) }));
 			});
 			setPowStatus(t("message.queryPickup"));
@@ -284,33 +264,6 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 			text: data.text,
 			remainingDownloads: data.remainingDownloads,
 		});
-	}
-
-	async function solvePowToken(onProgress: (progress: number) => void) {
-		capProgressRef.current = onProgress;
-		const { default: Cap } = await import("cap-widget");
-		const cap = new Cap({
-			apiEndpoint: "/api/pow/",
-			"data-cap-worker-count": "1",
-			"data-cap-i18n-initial-state": t("message.powWidgetInitial"),
-			"data-cap-i18n-verifying-label": t("message.powWidgetVerifying"),
-			"data-cap-i18n-solved-label": t("message.powWidgetSolved"),
-			"data-cap-i18n-error-label": t("message.powWidgetError"),
-		});
-		const handleProgress = (event: CustomEvent<{ progress: number }>) => capProgressRef.current(event.detail.progress);
-		cap.addEventListener("progress", handleProgress as EventListener);
-
-		try {
-			const result = await cap.solve();
-			if (!result.success || !result.token) {
-				throw new Error(t("message.powFailed"));
-			}
-
-			return result.token;
-		} finally {
-			cap.reset();
-			cap.widget.remove();
-		}
 	}
 
 	async function loadStats() {
@@ -405,7 +358,6 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 	return (
 		<main className="app-shell min-h-screen">
 			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
-				<ModeNavSwitch currentMode="locker" />
 				<StatsLockup stats={stats} />
 
 				<div className="grid flex-1 gap-6">
@@ -462,20 +414,3 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 	);
 }
 
-function csrfHeaders(csrfToken?: string | null): Record<string, string> {
-	return csrfToken ? { "x-csrf-token": csrfToken } : {};
-}
-
-function getDownloadFileName(contentDisposition: string | null, fallback: string) {
-	const utf8Match = contentDisposition?.match(/filename\*=UTF-8''([^;]+)/i);
-	if (utf8Match?.[1]) {
-		try {
-			return decodeURIComponent(utf8Match[1]);
-		} catch {
-			return fallback;
-		}
-	}
-
-	const asciiMatch = contentDisposition?.match(/filename="([^"]+)"/i);
-	return asciiMatch?.[1] || fallback;
-}

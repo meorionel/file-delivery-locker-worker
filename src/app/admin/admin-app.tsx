@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useI18n } from "../i18n";
 import { readApiJson } from "../components/api-json";
 import { formatBytes } from "../components/locker-format";
+import { csrfHeaders } from "@/lib/csrf";
+import { Modal } from "@/app/components/ui/modal";
+import { PrimaryButton, SecondaryButton, DangerButton } from "@/app/components/ui/button";
+import { FormField } from "@/app/components/ui/form-field";
 
 type AdminStatus = "available" | "expired" | "deleted" | "depleted";
 type AdminKind = "file" | "text";
@@ -312,17 +316,15 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 				</header>
 
 				<form className="panel panel-feature grid gap-4 min-[860px]:grid-cols-[minmax(220px,1fr)_180px_180px_auto]" onSubmit={applySearch}>
-					<label className="field flex flex-col gap-2">
-						<span>{t("admin.search")}</span>
+					<FormField label={t("admin.search")}>
 						<input
 							className="h-[42px] w-full"
 							value={searchInput}
 							onChange={(event) => setSearchInput(event.target.value)}
 							placeholder={t("admin.searchPlaceholder")}
 						/>
-					</label>
-					<label className="field flex flex-col gap-2">
-						<span>{t("admin.status")}</span>
+					</FormField>
+					<FormField label={t("admin.status")}>
 						<select
 							className="h-[42px] w-full"
 							value={status}
@@ -337,9 +339,8 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 								</option>
 							))}
 						</select>
-					</label>
-					<label className="field flex flex-col gap-2">
-						<span>{t("admin.kind")}</span>
+					</FormField>
+					<FormField label={t("admin.kind")}>
 						<select
 							className="h-[42px] w-full"
 							value={kind}
@@ -354,10 +355,10 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 								</option>
 							))}
 						</select>
-					</label>
-					<button className="primary-button inline-flex min-h-10 items-center justify-center self-end rounded-lg px-5 text-sm font-medium" type="submit">
+					</FormField>
+					<PrimaryButton className="self-end" type="submit">
 						{t("admin.search")}
-					</button>
+					</PrimaryButton>
 				</form>
 
 				{message ? <p className="auth-error">{message}</p> : null}
@@ -397,12 +398,12 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 										<td>{sourceBrowser(delivery.upload, t)}</td>
 										<td>
 											<div className="flex flex-wrap gap-2">
-												<button className="secondary-button min-h-9 rounded-lg px-3 text-sm" type="button" onClick={() => loadEvents(delivery)}>
+												<SecondaryButton className="min-h-9 rounded-lg px-3 text-sm" type="button" onClick={() => loadEvents(delivery)}>
 													{t("admin.events")}
-												</button>
-												<button className="secondary-button min-h-9 rounded-lg px-3 text-sm" disabled={demoMode} type="button" onClick={() => beginEdit(delivery)}>
+												</SecondaryButton>
+												<SecondaryButton className="min-h-9 rounded-lg px-3 text-sm" disabled={demoMode} type="button" onClick={() => beginEdit(delivery)}>
 													{demoMode ? t("admin.readonly") : t("admin.actions")}
-												</button>
+												</SecondaryButton>
 											</div>
 										</td>
 									</tr>
@@ -414,155 +415,94 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 					<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--hairline)] pt-4">
 						<span className="panel-copy">{t("admin.page", { page, totalPages })}</span>
 						<div className="flex gap-2">
-							<button className="secondary-button min-h-9 rounded-lg px-4 text-sm" disabled={page <= 1 || busy === "list"} type="button" onClick={() => setPage((value) => Math.max(1, value - 1))}>
+							<SecondaryButton className="min-h-9 rounded-lg px-4 text-sm" disabled={page <= 1 || busy === "list"} type="button" onClick={() => setPage((value) => Math.max(1, value - 1))}>
 								{t("admin.prevPage")}
-							</button>
-							<button className="secondary-button min-h-9 rounded-lg px-4 text-sm" disabled={page >= totalPages || busy === "list"} type="button" onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
+							</SecondaryButton>
+							<SecondaryButton className="min-h-9 rounded-lg px-4 text-sm" disabled={page >= totalPages || busy === "list"} type="button" onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
 								{t("admin.nextPage")}
-							</button>
+							</SecondaryButton>
 						</div>
 					</div>
 				</section>
 			</section>
 
-			{eventDelivery ? (
-				<AdminModal title={t("admin.events")} subtitle={eventDelivery.fileName} closeLabel={t("common.close")} onClose={() => setEventDelivery(null)} dark>
-					<div className="flex flex-col gap-3">
-						{message ? <p className="auth-error">{message}</p> : null}
-						{busy === "events" ? <p className="panel-copy">{t("common.loading")}</p> : null}
-						{events.map((event) => (
-							<div className="admin-event" key={event.id}>
-								<div className="flex items-center justify-between gap-3">
-									<strong>{actionLabel(event.action, t)}</strong>
-									<span>{formatDate(event.createdAt, locale)}</span>
-								</div>
-								<p>{sourceLocation(event.source, t)} · {sourceBrowser(event.source, t)}</p>
-								{event.previousMaxDownloads !== null || event.nextMaxDownloads !== null ? (
-									<p>
-										{t("admin.headerCounts")} {event.previousDownloadCount ?? "-"} / {event.previousMaxDownloads ?? "-"} → {event.nextDownloadCount ?? "-"} / {event.nextMaxDownloads ?? "-"}
-									</p>
-								) : null}
-								{event.note ? <p>{event.note}</p> : null}
+			<Modal open={eventDelivery !== null} title={t("admin.events")} subtitle={eventDelivery?.fileName} onClose={() => setEventDelivery(null)} dark>
+				<div className="flex flex-col gap-3">
+					{message ? <p className="auth-error">{message}</p> : null}
+					{busy === "events" ? <p className="panel-copy">{t("common.loading")}</p> : null}
+					{events.map((event) => (
+						<div className="admin-event" key={event.id}>
+							<div className="flex items-center justify-between gap-3">
+								<strong>{actionLabel(event.action, t)}</strong>
+								<span>{formatDate(event.createdAt, locale)}</span>
 							</div>
-						))}
-						{events.length === 0 && busy !== "events" ? <p className="panel-copy">{t("common.noEvents")}</p> : null}
-					</div>
-				</AdminModal>
-			) : null}
-
-			{actionDelivery ? (
-				<AdminModal title={t("admin.actions")} subtitle={actionDelivery.fileName} closeLabel={t("common.close")} onClose={() => setActionDelivery(null)}>
-					<div className="grid gap-5">
-						{message ? <p className="auth-error">{message}</p> : null}
-						<div className="grid gap-3 sm:grid-cols-2">
-							<label className="field flex flex-col gap-2">
-								<span>{t("admin.maxDownloads")}</span>
-								<input
-									className="h-[42px] w-full"
-									disabled={demoMode}
-									min={1}
-									type="number"
-									value={editMaxDownloads}
-									onChange={(event) => setEditMaxDownloads(event.target.value)}
-								/>
-							</label>
-							<label className="field flex flex-col gap-2">
-								<span>{t("admin.usedDownloads")}</span>
-								<input
-									className="h-[42px] w-full"
-									disabled={demoMode}
-									min={0}
-									type="number"
-									value={editDownloadCount}
-									onChange={(event) => setEditDownloadCount(event.target.value)}
-								/>
-							</label>
+							<p>{sourceLocation(event.source, t)} · {sourceBrowser(event.source, t)}</p>
+							{event.previousMaxDownloads !== null || event.nextMaxDownloads !== null ? (
+								<p>
+									{t("admin.headerCounts")} {event.previousDownloadCount ?? "-"} / {event.previousMaxDownloads ?? "-"} → {event.nextDownloadCount ?? "-"} / {event.nextMaxDownloads ?? "-"}
+								</p>
+							) : null}
+							{event.note ? <p>{event.note}</p> : null}
 						</div>
-						<div className="rounded-lg border border-[var(--hairline)] p-4 text-sm text-[var(--muted)]">
-							<p className="m-0">{t("admin.currentStatus", { status: statusLabel(actionDelivery.status, t) })}</p>
-							<p className="m-0 mt-2">{t("admin.currentCounts", { downloadCount: actionDelivery.downloadCount, maxDownloads: actionDelivery.maxDownloads })}</p>
-							{actionDelivery.deletedReason ? <p className="m-0 mt-2">{t("admin.deletedReason", { reason: actionDelivery.deletedReason })}</p> : null}
-						</div>
-						<div className="flex flex-wrap justify-between gap-3 border-t border-[var(--hairline)] pt-4">
-							<button
-								className="danger-button inline-flex min-h-10 items-center justify-center rounded-lg px-5 text-sm font-medium"
-								disabled={demoMode || actionDelivery.deletedAt !== null || busy === "revoke"}
-								type="button"
-								onClick={() => revokeDelivery(actionDelivery)}
-							>
-								{busy === "revoke" ? t("admin.revoking") : t("admin.revokeFile")}
-							</button>
-							<div className="flex flex-wrap gap-2">
-								<button className="secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-5 text-sm font-medium" type="button" onClick={() => setActionDelivery(null)}>
-									{t("common.close")}
-								</button>
-								<button
-									className="primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-5 text-sm font-medium"
-									disabled={demoMode || busy === "counts"}
-									type="button"
-									onClick={() => saveCounts(actionDelivery)}
-								>
-									{busy === "counts" ? t("admin.saving") : t("admin.saveCounts")}
-								</button>
-							</div>
-						</div>
-					</div>
-				</AdminModal>
-			) : null}
-		</main>
-	);
-}
-
-function csrfHeaders(csrfToken: string): Record<string, string> {
-	return csrfToken ? { "x-csrf-token": csrfToken } : {};
-}
-
-function AdminModal({
-	children,
-	closeLabel,
-	dark = false,
-	onClose,
-	subtitle,
-	title,
-}: {
-	children: ReactNode;
-	closeLabel: string;
-	dark?: boolean;
-	onClose: () => void;
-	subtitle: string;
-	title: string;
-}) {
-	useEffect(() => {
-		function closeOnEscape(event: KeyboardEvent) {
-			if (event.key === "Escape") {
-				onClose();
-			}
-		}
-
-		window.addEventListener("keydown", closeOnEscape);
-		return () => window.removeEventListener("keydown", closeOnEscape);
-	}, [onClose]);
-
-	return (
-		<div className="admin-modal-backdrop" role="presentation" onMouseDown={onClose}>
-			<section
-				aria-modal="true"
-				className={`admin-modal ${dark ? "panel-dark" : ""}`}
-				role="dialog"
-				onMouseDown={(event) => event.stopPropagation()}
-			>
-				<div className="flex items-start justify-between gap-4">
-					<div>
-						<h2>{title}</h2>
-						<p className="panel-copy">{subtitle}</p>
-					</div>
-					<button className="secondary-button admin-modal-close" type="button" aria-label={closeLabel} onClick={onClose}>
-						×
-					</button>
+					))}
+					{events.length === 0 && busy !== "events" ? <p className="panel-copy">{t("common.noEvents")}</p> : null}
 				</div>
-				{children}
-			</section>
-		</div>
+			</Modal>
+
+			<Modal open={actionDelivery !== null} title={t("admin.actions")} subtitle={actionDelivery?.fileName} onClose={() => setActionDelivery(null)}>
+				<div className="grid gap-5">
+					{message ? <p className="auth-error">{message}</p> : null}
+					<div className="grid gap-3 sm:grid-cols-2">
+						<FormField label={t("admin.maxDownloads")}>
+							<input
+								className="h-[42px] w-full"
+								disabled={demoMode}
+								min={1}
+								type="number"
+								value={editMaxDownloads}
+								onChange={(event) => setEditMaxDownloads(event.target.value)}
+							/>
+						</FormField>
+						<FormField label={t("admin.usedDownloads")}>
+							<input
+								className="h-[42px] w-full"
+								disabled={demoMode}
+								min={0}
+								type="number"
+								value={editDownloadCount}
+								onChange={(event) => setEditDownloadCount(event.target.value)}
+							/>
+						</FormField>
+					</div>
+					<div className="rounded-lg border border-[var(--hairline)] p-4 text-sm text-[var(--muted)]">
+						<p className="m-0">{actionDelivery && t("admin.currentStatus", { status: statusLabel(actionDelivery.status, t) })}</p>
+						<p className="m-0 mt-2">{actionDelivery && t("admin.currentCounts", { downloadCount: actionDelivery.downloadCount, maxDownloads: actionDelivery.maxDownloads })}</p>
+						{actionDelivery?.deletedReason ? <p className="m-0 mt-2">{t("admin.deletedReason", { reason: actionDelivery.deletedReason })}</p> : null}
+					</div>
+					<div className="flex flex-wrap justify-between gap-3 border-t border-[var(--hairline)] pt-4">
+						<DangerButton
+							disabled={demoMode || !actionDelivery || actionDelivery.deletedAt !== null || busy === "revoke"}
+							type="button"
+							onClick={() => actionDelivery && revokeDelivery(actionDelivery)}
+						>
+							{busy === "revoke" ? t("admin.revoking") : t("admin.revokeFile")}
+						</DangerButton>
+						<div className="flex flex-wrap gap-2">
+							<SecondaryButton type="button" onClick={() => setActionDelivery(null)}>
+								{t("common.close")}
+							</SecondaryButton>
+							<PrimaryButton
+								disabled={demoMode || busy === "counts"}
+								type="button"
+								onClick={() => actionDelivery && saveCounts(actionDelivery)}
+							>
+								{busy === "counts" ? t("admin.saving") : t("admin.saveCounts")}
+							</PrimaryButton>
+						</div>
+					</div>
+				</div>
+			</Modal>
+		</main>
 	);
 }
 

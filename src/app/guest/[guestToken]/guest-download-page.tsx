@@ -1,26 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GooeyToaster, gooeyToast } from "goey-toast";
 import { readApiJson } from "../../components/api-json";
-import { formatBytes, formatTime } from "../../components/locker-format";
 import type { ApiError, Delivery, DeliveryLookupResult, TextPreview } from "../../components/locker-types";
-import { Mini } from "../../components/mini";
 import { useI18n } from "../../i18n";
+import { getDownloadFileName } from "@/lib/file";
+import { solvePowToken } from "@/lib/pow";
+import { notify } from "@/lib/notify";
+import { PrimaryButton } from "@/app/components/ui/button";
+import { DeliverySummary } from "@/app/components/delivery/delivery-summary";
+import { TextPreviewBlock } from "@/app/components/delivery/text-preview-block";
 
 type GuestDownloadPageProps = {
 	guestToken: string;
 };
 
 export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps) {
-	const { locale, t } = useI18n();
+	const { t } = useI18n();
 	const [delivery, setDelivery] = useState<Delivery | null>(null);
 	const [loadError, setLoadError] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [textPreview, setTextPreview] = useState<TextPreview | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [powStatus, setPowStatus] = useState("");
-	const capProgressRef = useRef<(progress: number) => void>(() => undefined);
 	const statusText: Record<Delivery["status"], string> = {
 		available: t("status.available"),
 		deleted: t("status.deleted"),
@@ -61,54 +64,6 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 		return () => window.clearTimeout(timer);
 	}, [loadGuestDelivery]);
 
-	function notify(message: string, type: "default" | "success" | "error" | "warning" = "default") {
-		const options = { preset: "subtle" as const, showTimestamp: false, showProgress: true };
-
-		if (type === "success") {
-			gooeyToast.success(message, options);
-			return;
-		}
-
-		if (type === "error") {
-			gooeyToast.error(message, options);
-			return;
-		}
-
-		if (type === "warning") {
-			gooeyToast.warning(message, options);
-			return;
-		}
-
-		gooeyToast(message, options);
-	}
-
-	async function solvePowToken(onProgress: (progress: number) => void) {
-		capProgressRef.current = onProgress;
-		const { default: Cap } = await import("cap-widget");
-		const cap = new Cap({
-			apiEndpoint: "/api/pow/",
-			"data-cap-worker-count": "1",
-			"data-cap-i18n-initial-state": t("message.powWidgetInitial"),
-			"data-cap-i18n-verifying-label": t("message.powWidgetVerifying"),
-			"data-cap-i18n-solved-label": t("message.powWidgetSolved"),
-			"data-cap-i18n-error-label": t("message.powWidgetError"),
-		});
-		const handleProgress = (event: CustomEvent<{ progress: number }>) => capProgressRef.current(event.detail.progress);
-		cap.addEventListener("progress", handleProgress as EventListener);
-
-		try {
-			const result = await cap.solve();
-			if (!result.success || !result.token) {
-				throw new Error(t("message.powFailed"));
-			}
-
-			return result.token;
-		} finally {
-			cap.reset();
-			cap.widget.remove();
-		}
-	}
-
 	async function openGuestDelivery() {
 		gooeyToast.dismiss();
 
@@ -124,7 +79,7 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 				throw new Error(t("message.queryFailed"));
 			}
 
-			const capToken = await solvePowToken((progress) => {
+			const capToken = await solvePowToken(t, (progress) => {
 				setPowStatus(t("message.powProgress", { progress: Math.round(progress) }));
 			});
 
@@ -190,64 +145,27 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 					{loading ? <p className="panel-copy m-0">{t("guest.loading")}</p> : null}
 					{loadError ? <p className="auth-error">{loadError}</p> : null}
 					{delivery && (
-						<div className="guest-delivery-summary flex flex-col gap-4">
-							<div className="flex items-start justify-between gap-4">
-								<div className="min-w-0">
-									<p className="guest-file-name truncate">{delivery.fileName}</p>
-									<p className="panel-copy">{formatBytes(delivery.size)}</p>
-								</div>
-								<span className={`status-pill guest-status-pill guest-status-${delivery.status} flex-none rounded-full px-2.5 py-[5px]`}>
-									{statusText[delivery.status]}
-								</span>
-							</div>
-							<div className="guest-meta-grid grid grid-cols-2 gap-3 text-sm">
-								<Mini label={t("guest.status")} value={statusText[delivery.status]} />
-								<Mini
-									label={t("pickup.remaining")}
-									value={
-										delivery.maxDownloads === 0
-											? t("common.unlimited")
-											: `${delivery.remainingDownloads ?? 0}/${delivery.maxDownloads}`
-									}
-								/>
-								<Mini label={t("pickup.expires")} value={formatTime(delivery.expiresAt, locale, t("common.forever"))} />
-								<Mini label={t("guest.size")} value={formatBytes(delivery.size)} />
-							</div>
-						</div>
+						<DeliverySummary delivery={delivery} statusText={statusText} variant="guest" />
 					)}
 					{delivery?.kind === "text" && textPreview && (
-						<div className="text-preview guest-text-preview flex flex-col gap-3">
-							<div className="flex items-center justify-between gap-3">
-								<span>{t("pickup.preview")}</span>
-								<small>
-									{textPreview.remainingDownloads === null
-										? t("common.unlimited")
-										: t("pickup.remainingTimes", { count: textPreview.remainingDownloads })}
-								</small>
-							</div>
-							<pre>{textPreview.text}</pre>
-							<button
-								className="secondary-button inline-flex min-h-10 items-center justify-center gap-[9px] rounded-lg px-5 text-sm leading-none font-medium no-underline"
-								type="button"
-								onClick={() => {
-									void navigator.clipboard.writeText(textPreview.text);
-									notify(t("common.copy"), "success");
-								}}
-							>
-								<span aria-hidden="true">⧉</span>
-								{t("pickup.copyText")}
-							</button>
-						</div>
+						<TextPreviewBlock
+							text={textPreview.text}
+							remainingDownloads={textPreview.remainingDownloads}
+							onCopy={(copiedText) => {
+								void navigator.clipboard.writeText(copiedText);
+								notify(t("common.copy"), "success");
+							}}
+						/>
 					)}
-					<button
-						className="primary-button guest-action inline-flex min-h-10 items-center justify-center gap-[9px] rounded-lg px-5 text-sm leading-none font-medium no-underline"
+					<PrimaryButton
+						className="guest-action"
 						disabled={busy || loading || !delivery || delivery.status !== "available"}
 						type="button"
 						onClick={openGuestDelivery}
 					>
 						<span aria-hidden="true">{delivery?.kind === "text" ? "⌕" : "↓"}</span>
 						{busy ? t("guest.verifying") : delivery?.kind === "text" ? t("guest.viewText") : t("guest.download")}
-					</button>
+					</PrimaryButton>
 					{powStatus && <p className="panel-copy m-0 text-center">{powStatus}</p>}
 				</div>
 				<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
@@ -256,16 +174,3 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 	);
 }
 
-function getDownloadFileName(contentDisposition: string | null, fallback: string) {
-	const utf8Match = contentDisposition?.match(/filename\*=UTF-8''([^;]+)/i);
-	if (utf8Match?.[1]) {
-		try {
-			return decodeURIComponent(utf8Match[1]);
-		} catch {
-			return fallback;
-		}
-	}
-
-	const asciiMatch = contentDisposition?.match(/filename="([^"]+)"/i);
-	return asciiMatch?.[1] || fallback;
-}

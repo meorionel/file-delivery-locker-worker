@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PickupCodeInput } from "@/app/components/pickup-code-input";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
+import { PrimaryButton, SecondaryButton } from "@/app/components/ui/button";
 
 type Props = {
   demoMode: boolean;
@@ -78,14 +79,13 @@ export function RoomGate({ demoMode }: Props) {
   return (
     <div className="panel room-gate">
       <div className="room-gate-section">
-        <button
+        <PrimaryButton
           type="button"
-          className="primary-button"
           disabled={creating || demoMode}
           onClick={handleCreate}
         >
           {creating ? t("room.creating") : t("room.createRoom")}
-        </button>
+        </PrimaryButton>
       </div>
 
       <div className="room-gate-divider" />
@@ -93,15 +93,14 @@ export function RoomGate({ demoMode }: Props) {
       <div className="room-gate-section">
         <label className="field-label">{t("room.roomCode")}</label>
         <PickupCodeInput value={joinCode} onChange={setJoinCode} disabled={joining || demoMode} />
-        <button
+        <SecondaryButton
           type="button"
-          className="secondary-button"
           disabled={joining || demoMode || joinCode.replace(/[^A-Za-z0-9]/g, "").length !== 6}
           onClick={handleJoin}
           style={{ marginTop: "0.75rem" }}
         >
           {joining ? t("room.joining") : t("room.joinRoom")}
-        </button>
+        </SecondaryButton>
       </div>
 
       {error && <p className="room-gate-error">{error}</p>}

@@ -5,6 +5,10 @@ import type { DragEvent, FormEvent } from "react";
 import { useI18n } from "../i18n";
 import { CodeBlock } from "./code-block";
 import type { DeliveryKind, UploadResult } from "./locker-types";
+import { PrimaryButton } from "@/app/components/ui/button";
+import { FormField } from "@/app/components/ui/form-field";
+import { Badge } from "@/app/components/ui/badge";
+import { Switch } from "@/app/components/ui/switch";
 
 const expiryOptions = [
 	{ labelKey: "common.forever", value: 0 },
@@ -135,27 +139,18 @@ export function UploadPanel({
 								: selectedFileName ?? t("upload.fileCopy")}
 					</p>
 				</div>
-				<span className="badge-coral inline-flex w-fit items-center">{uploadBadge}</span>
+				<Badge variant="coral">{uploadBadge}</Badge>
 			</div>
 
-			<div className="w-full">
-				<div className="mode-switch-row inline-flex min-h-11 w-fit items-center justify-center self-center">
-					<span className={deliveryMode === "file" ? "active" : undefined}>{t("upload.modeFile")}</span>
-					<button
-						type="button"
-						className="mode-switch inline-flex h-7 w-[54px] items-center p-0 mx-2"
-						role="switch"
-						aria-checked={deliveryMode === "text"}
-						aria-label={t("upload.switchKind")}
-						disabled={demoMode}
-						onClick={() => onDeliveryModeChange(deliveryMode === "text" ? "file" : "text")}
-					>
-						<span className="switch-track relative block h-7 w-[54px] rounded-full" aria-hidden="true">
-							<span className="switch-thumb absolute top-1 left-1 h-5 w-5 rounded-full" />
-						</span>
-					</button>
-					<span className={deliveryMode === "text" ? "active" : undefined}>{t("upload.modeText")}</span>
-				</div>
+			<div className="flex justify-center w-full">
+				<Switch
+					checked={deliveryMode === "text"}
+					onChange={() => onDeliveryModeChange(deliveryMode === "text" ? "file" : "text")}
+					leftLabel={t("upload.modeFile")}
+					rightLabel={t("upload.modeText")}
+					ariaLabel={t("upload.switchKind")}
+					disabled={demoMode}
+				/>
 			</div>
 
 			{deliveryMode === "text" ? (
@@ -198,8 +193,7 @@ export function UploadPanel({
 			)}
 
 			<div className="grid gap-4 sm:grid-cols-2">
-				<label className="field flex flex-col gap-2">
-					<span>{t("upload.expiry")}</span>
+				<FormField label={t("upload.expiry")}>
 					<select
 						className="h-[42px] w-full"
 						disabled={demoMode}
@@ -212,9 +206,8 @@ export function UploadPanel({
 							</option>
 						))}
 					</select>
-				</label>
-				<label className="field flex flex-col gap-2">
-					<span>{t("upload.downloadLimit")}</span>
+				</FormField>
+				<FormField label={t("upload.downloadLimit")}>
 					<div className="flex min-h-[42px] items-center gap-3">
 						<input
 							className="h-[42px] min-w-0 flex-1"
@@ -233,7 +226,7 @@ export function UploadPanel({
 							<span>{t("upload.unlimitedTimes")}</span>
 						</label>
 					</div>
-				</label>
+				</FormField>
 			</div>
 
 			<label className="field inline-flex min-h-[42px] items-start gap-3">
@@ -250,14 +243,10 @@ export function UploadPanel({
 				</span>
 			</label>
 
-			<button
-				className="primary-button inline-flex min-h-10 items-center justify-center gap-[9px] rounded-lg px-5 text-sm leading-none font-medium no-underline"
-				disabled={busy || demoMode}
-				type="submit"
-			>
+			<PrimaryButton disabled={busy || demoMode} type="submit">
 				<span aria-hidden="true">↑</span>
 				{demoMode ? t("upload.demoReadonly") : busy ? t("upload.uploading") : t("upload.submit")}
-			</button>
+			</PrimaryButton>
 
 			{uploadResult && (
 				<div className="grid grid-cols-1 gap-3 border-t border-[rgba(20,20,19,0.08)] pt-[18px] sm:grid-cols-2">
