@@ -8,7 +8,7 @@ import {
 import { useI18n } from "../i18n";
 import { PICKUP_CODE_LENGTH, normalizePickupCode } from "./locker-format";
 
-export function PickupCodeInput({ onChange, value }: { onChange: (value: string) => void; value: string }) {
+export function PickupCodeInput({ onChange, value, disabled = false }: { onChange: (value: string) => void; value: string; disabled?: boolean }) {
 	const { t } = useI18n();
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 	const chars = Array.from({ length: PICKUP_CODE_LENGTH }, (_, index) => value[index] ?? "");
@@ -77,6 +77,7 @@ export function PickupCodeInput({ onChange, value }: { onChange: (value: string)
 						aria-label={t("pickup.charLabel", { index: index + 1 })}
 						autoCapitalize="characters"
 						autoComplete={index === 0 ? "one-time-code" : "off"}
+						disabled={disabled}
 						inputMode="text"
 						key={index}
 						maxLength={1}

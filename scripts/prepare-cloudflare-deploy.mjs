@@ -58,7 +58,8 @@ async function main() {
 	const generatedConfig = {
 		...config,
 		$schema: relativeToGeneratedConfig(config.$schema),
-		main: relativeToGeneratedConfig(config.main),
+		// Use custom worker entry that wraps OpenNext with Room Durable Object support
+		main: relativeToGeneratedConfig("scripts/worker-entry.mjs"),
 		assets: {
 			...config.assets,
 			directory: relativeToGeneratedConfig(config.assets?.directory),
@@ -75,6 +76,21 @@ async function main() {
 				database_name: databaseName,
 				database_id: d1Database.uuid,
 				migrations_dir: relativeToGeneratedConfig(d1Binding.migrations_dir),
+			},
+		],
+		// Room mode: Durable Object for WebSocket-based real-time file sharing
+		durable_objects: {
+			bindings: [
+				{
+					name: "ROOM_DO",
+					class_name: "Room",
+				},
+			],
+		},
+		migrations: [
+			{
+				tag: "v1",
+				new_classes: ["Room"],
 			},
 		],
 	};

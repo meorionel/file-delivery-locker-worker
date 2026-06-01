@@ -8,6 +8,7 @@ import "./styles/stats.css";
 import "./styles/forms.css";
 import "./styles/buttons.css";
 import "./styles/delivery.css";
+import "./styles/room.css";
 import "./goey-toast.css";
 
 export const metadata: Metadata = {

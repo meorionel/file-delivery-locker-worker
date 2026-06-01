@@ -24,6 +24,8 @@ import type {
 import { PickupPanel } from "./components/pickup-panel";
 import { StatsLockup } from "./components/stats-lockup";
 import { UploadPanel } from "./components/upload-panel";
+import { TransferModeSwitch } from "./components/room/switch";
+import RoomApp from "./room-app";
 
 const MAX_TEXT_SIZE = 256 * 1024;
 const textFilePattern = /\.(txt|md|csv|json|log|xml|yml|yaml)$/i;
@@ -39,6 +41,7 @@ type LockerAppProps = {
 
 export default function LockerApp({ csrfToken = null, demoMode = false }: LockerAppProps) {
 	const { t } = useI18n();
+	const [transferMode, setTransferMode] = useState<"locker" | "room">("locker");
 	const [deliveryMode, setDeliveryMode] = useState<DeliveryKind>("file");
 	const [file, setFile] = useState<File | null>(null);
 	const [textContent, setTextContent] = useState("");
@@ -405,53 +408,60 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 		<main className="app-shell min-h-screen">
 			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
 				<StatsLockup stats={stats} />
-				<div className="grid flex-1 gap-6">
-					<div className="grid gap-6 min-[960px]:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] min-[960px]:items-start">
-						<UploadPanel
-							busy={busy === "upload"}
-							demoMode={demoMode}
-							deliveryMode={deliveryMode}
-							expiresInHours={expiresInHours}
-							guestAccessEnabled={guestAccessEnabled}
-							maxDownloadsInput={maxDownloadsInput}
-							maxDownloadsUnlimited={maxDownloadsUnlimited}
-							selectedFileName={file?.name ?? null}
-							textContent={textContent}
-							uploadBadge={uploadBadge}
-							uploadResult={uploadResult}
-							onCopy={copy}
-							onDeliveryModeChange={setDeliveryMode}
-							onExpiresInHoursChange={setExpiresInHours}
-							onFileChange={setFile}
-							onGuestAccessEnabledChange={setGuestAccessEnabled}
-							onMaxDownloadsInputChange={setMaxDownloadsInput}
-							onMaxDownloadsUnlimitedChange={setMaxDownloadsUnlimited}
-							onSubmit={uploadDelivery}
-							onTextContentChange={setTextContent}
-							onTextFileChange={importTextFile}
-						/>
-						<PickupPanel
-							busy={busy === "lookup"}
-							delivery={delivery}
-							downloading={busy === "download"}
-							pickupCode={pickupCode}
-							pickupAccessToken={pickupAccessToken}
-							powStatus={powStatus}
-							textPreview={textPreview}
-							onCopy={copy}
-							onDownload={downloadDelivery}
-							onPickupCodeChange={setPickupCode}
-							onSubmit={lookupDelivery}
+
+				<TransferModeSwitch value={transferMode} onChange={setTransferMode} />
+
+				{transferMode === "room" ? (
+					<RoomApp demoMode={demoMode} />
+				) : (
+					<div className="grid flex-1 gap-6">
+						<div className="grid gap-6 min-[960px]:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] min-[960px]:items-start">
+							<UploadPanel
+								busy={busy === "upload"}
+								demoMode={demoMode}
+								deliveryMode={deliveryMode}
+								expiresInHours={expiresInHours}
+								guestAccessEnabled={guestAccessEnabled}
+								maxDownloadsInput={maxDownloadsInput}
+								maxDownloadsUnlimited={maxDownloadsUnlimited}
+								selectedFileName={file?.name ?? null}
+								textContent={textContent}
+								uploadBadge={uploadBadge}
+								uploadResult={uploadResult}
+								onCopy={copy}
+								onDeliveryModeChange={setDeliveryMode}
+								onExpiresInHoursChange={setExpiresInHours}
+								onFileChange={setFile}
+								onGuestAccessEnabledChange={setGuestAccessEnabled}
+								onMaxDownloadsInputChange={setMaxDownloadsInput}
+								onMaxDownloadsUnlimitedChange={setMaxDownloadsUnlimited}
+								onSubmit={uploadDelivery}
+								onTextContentChange={setTextContent}
+								onTextFileChange={importTextFile}
+							/>
+							<PickupPanel
+								busy={busy === "lookup"}
+								delivery={delivery}
+								downloading={busy === "download"}
+								pickupCode={pickupCode}
+								pickupAccessToken={pickupAccessToken}
+								powStatus={powStatus}
+								textPreview={textPreview}
+								onCopy={copy}
+								onDownload={downloadDelivery}
+								onPickupCodeChange={setPickupCode}
+								onSubmit={lookupDelivery}
+							/>
+						</div>
+
+						<AdminPanel
+							busy={busy === "revoke"}
+							manageCode={manageCode}
+							onManageCodeChange={setManageCode}
+							onSubmit={revokeDelivery}
 						/>
 					</div>
-
-					<AdminPanel
-						busy={busy === "revoke"}
-						manageCode={manageCode}
-						onManageCodeChange={setManageCode}
-						onSubmit={revokeDelivery}
-					/>
-				</div>
+				)}
 
 				<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
 			</section>
