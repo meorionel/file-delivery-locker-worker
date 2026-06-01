@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { gooeyToast } from "goey-toast";
+import { GooeyToaster, gooeyToast } from "goey-toast";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 import { getDownloadFileName } from "@/lib/file";
@@ -154,7 +154,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
         : t("room.connecting");
 
   return (
-    <div className="room-view">
+    <div className="flex flex-col gap-6">
       <div className="room-header">
         <div className="room-header-info">
           <h2 className="room-title">
@@ -166,9 +166,14 @@ export function RoomView({ roomCode, joinToken }: Props) {
         </div>
       </div>
 
-      <RoomUploadBar roomCode={roomCode} joinToken={joinToken} onUploaded={requestSync} />
+      <div className="grid gap-6 min-[960px]:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] min-[960px]:items-start">
+        <RoomUploadBar roomCode={roomCode} joinToken={joinToken} onUploaded={requestSync} />
 
-      <RoomFileList files={files} onDownload={handleDownload} onPreview={handlePreview} />
+        <div className="panel panel-dark flex flex-col gap-5">
+          <h2>{t("room.fileList")}</h2>
+          <RoomFileList files={files} onDownload={handleDownload} onPreview={handlePreview} />
+        </div>
+      </div>
 
       {previewFile && previewText && (
         <RoomFileModal
@@ -180,7 +185,8 @@ export function RoomView({ roomCode, joinToken }: Props) {
           }}
         />
       )}
+
+      <GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
     </div>
   );
 }
-

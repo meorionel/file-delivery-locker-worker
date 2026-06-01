@@ -4,6 +4,7 @@ import { type FormEvent, useRef, useState } from "react";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 import { PrimaryButton } from "@/app/components/ui/button";
+import { Switch } from "@/app/components/ui/switch";
 import type { DeliveryKind, UploadFileResult } from "./room-types";
 
 type Props = {
@@ -13,7 +14,6 @@ type Props = {
 };
 
 const MAX_TEXT_SIZE = 256 * 1024;
-const textFilePattern = /\.(txt|md|csv|json|log|xml|yml|yaml)$/i;
 
 export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
   const { t } = useI18n();
@@ -94,54 +94,56 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setKind("file");
     }
   }
 
   return (
-    <form className="room-upload-bar" onSubmit={handleUpload}>
-      <div className="room-upload-kind-toggle">
-        <button
-          type="button"
-          className={`room-upload-kind-btn ${kind === "text" ? "room-upload-kind-active" : ""}`}
-          onClick={() => setKind("text")}
-        >
-          {t("upload.modeText")}
-        </button>
-        <button
-          type="button"
-          className={`room-upload-kind-btn ${kind === "file" ? "room-upload-kind-active" : ""}`}
-          onClick={() => setKind("file")}
-        >
-          {t("upload.modeFile")}
-        </button>
+    <form className="panel panel-feature flex flex-col gap-6" onSubmit={handleUpload}>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h2>{kind === "text" ? t("room.uploadText") : t("room.uploadFile")}</h2>
+        </div>
+      </div>
+
+      <div className="flex justify-center w-full">
+        <Switch
+          checked={kind === "text"}
+          onChange={() => setKind(kind === "text" ? "file" : "text")}
+          leftLabel={t("upload.modeFile")}
+          rightLabel={t("upload.modeText")}
+          ariaLabel={t("upload.switchKind")}
+        />
       </div>
 
       {kind === "text" ? (
-        <textarea
-          className="field room-upload-textarea"
-          value={textContent}
-          onChange={(e) => setTextContent(e.target.value)}
-          placeholder={t("upload.textPlaceholder")}
-          rows={3}
-        />
+        <div className="text-dropzone field flex flex-col gap-3">
+          <textarea
+            className="h-[140px] w-full resize-none"
+            value={textContent}
+            onChange={(e) => setTextContent(e.target.value)}
+            placeholder={t("upload.textPlaceholder")}
+          />
+        </div>
       ) : (
-        <div className="room-upload-file-row">
+        <label className="dropzone flex min-h-[140px] flex-col items-center justify-center gap-2.5 cursor-pointer">
           <input
             ref={fileInputRef}
+            className="sr-only"
             type="file"
             onChange={handleFileChange}
-            className="room-upload-file-input"
           />
-          {selectedFile && <span className="room-upload-filename">{selectedFile.name}</span>}
-        </div>
+          <span className="text-4xl">+</span>
+          <span className="font-medium">
+            {selectedFile ? selectedFile.name : t("upload.chooseFile")}
+          </span>
+        </label>
       )}
 
       <PrimaryButton type="submit" disabled={uploading}>
         {uploading ? t("upload.uploading") : kind === "text" ? t("room.uploadText") : t("room.uploadFile")}
       </PrimaryButton>
 
-      {error && <p className="room-upload-error">{error}</p>}
+      {error && <p className="auth-error">{error}</p>}
     </form>
   );
 }

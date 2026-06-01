@@ -55,39 +55,6 @@
   background: rgba(204, 120, 92, 0.22);
 }
 
-/* Room Gate */
-.room-gate {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-.room-gate-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.room-gate-divider {
-  border-top: 1px solid var(--hairline);
-}
-
-.room-gate-error {
-  color: var(--error);
-  font-size: 14px;
-  margin: 0;
-  text-align: center;
-}
-
-/* Room View */
-.room-view {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
 .room-header {
   display: flex;
   align-items: center;
@@ -142,77 +109,6 @@
 .room-status-rest-fallback {
   background: rgba(93, 184, 166, 0.14);
   color: #2f6b5e;
-}
-
-/* Upload Bar */
-.room-upload-bar {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 20px;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  background: var(--surface-soft);
-}
-
-.room-upload-kind-toggle {
-  display: flex;
-  gap: 4px;
-  background: var(--surface-cream-strong);
-  border-radius: 8px;
-  padding: 3px;
-}
-
-.room-upload-kind-btn {
-  border: 0;
-  background: transparent;
-  border-radius: 6px;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 12px;
-  transition: background 160ms ease, color 160ms ease;
-}
-
-.room-upload-kind-active {
-  background: var(--canvas);
-  color: var(--ink);
-  box-shadow: 0 1px 3px rgba(20, 20, 19, 0.08);
-}
-
-.room-upload-textarea {
-  flex: 1;
-  min-width: 200px;
-}
-
-.room-upload-file-row {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 200px;
-}
-
-.room-upload-file-input {
-  font-size: 14px;
-}
-
-.room-upload-filename {
-  color: var(--body);
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 200px;
-}
-
-.room-upload-error {
-  color: var(--error);
-  font-size: 13px;
-  margin: 0;
-  width: 100%;
 }
 
 /* File List */
@@ -292,6 +188,42 @@
   white-space: nowrap;
 }
 
+/* Dark panel overrides for file list */
+.panel-dark .room-file-list {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.panel-dark .room-file-header {
+  color: var(--on-dark-soft);
+  border-bottom-color: rgba(250, 249, 245, 0.1);
+}
+
+.panel-dark .room-file-name {
+  color: var(--on-dark);
+}
+
+.panel-dark .room-file-size {
+  color: var(--on-dark-soft);
+}
+
+.panel-dark .room-file-time {
+  color: var(--on-dark-soft);
+}
+
+.panel-dark .room-file-row {
+  border-bottom-color: rgba(250, 249, 245, 0.06);
+}
+
+.panel-dark .room-file-row:hover {
+  background: rgba(250, 249, 245, 0.05);
+}
+
+.panel-dark .room-empty {
+  color: var(--on-dark-soft);
+}
+
 /* Empty state */
 .room-empty {
   color: var(--muted);
@@ -331,13 +263,5 @@
 
   .room-file-header .room-file-size {
     display: none;
-  }
-
-  .room-upload-bar {
-    flex-direction: column;
-  }
-
-  .room-upload-textarea {
-    min-width: 100%;
   }
 }
