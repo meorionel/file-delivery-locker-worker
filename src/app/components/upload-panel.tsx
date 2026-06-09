@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DragEvent, FormEvent } from "react";
+import { Icon } from "@iconify/react";
 import { useI18n } from "../i18n";
 import { CodeBlock } from "./code-block";
 import type { DeliveryKind, UploadResult } from "./locker-types";
@@ -187,7 +188,7 @@ export function UploadPanel({
 						type="file"
 						onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
 					/>
-					<span className="text-4xl">+</span>
+					<Icon icon="tabler:file-plus" className="text-4xl" />
 					<span className="font-medium">{demoMode ? t("upload.demoNoUpload") : t("upload.chooseFile")}</span>
 				</label>
 			)}
@@ -244,7 +245,7 @@ export function UploadPanel({
 			</label>
 
 			<PrimaryButton disabled={busy || demoMode} type="submit">
-				<span aria-hidden="true">↑</span>
+				<Icon icon="tabler:upload" aria-hidden="true" />
 				{demoMode ? t("upload.demoReadonly") : busy ? t("upload.uploading") : t("upload.submit")}
 			</PrimaryButton>
 

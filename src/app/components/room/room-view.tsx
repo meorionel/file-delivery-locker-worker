@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Icon } from "@iconify/react";
 import { GooeyToaster, gooeyToast } from "goey-toast";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
@@ -182,9 +183,11 @@ export function RoomView({ roomCode, joinToken }: Props) {
           <div className="room-header-info">
             <div className="room-header-actions">
               <button className="room-header-action-btn" onClick={handleExitRoom} title={t("room.exitRoom")}>
+                <Icon icon="tabler:door-exit" />
                 {t("room.exitRoom")}
               </button>
               <button className="room-header-action-btn" onClick={handleCopyCode} title={t("room.copyCode")}>
+                <Icon icon="tabler:copy" />
                 {t("room.copyCode")}
               </button>
             </div>

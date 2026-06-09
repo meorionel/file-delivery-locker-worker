@@ -16,6 +16,7 @@
 	},
 	"dependencies": {
 		"@cap.js/server": "^4.0.5",
+		"@iconify/react": "^6.0.2",
 		"@opennextjs/cloudflare": "^1.19.8",
 		"cap-widget": "^0.1.50",
 		"goey-toast": "^0.4.0",

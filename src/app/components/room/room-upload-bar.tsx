@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 import { PrimaryButton } from "@/app/components/ui/button";
@@ -137,7 +138,7 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
           )}
 
           <PrimaryButton type="submit" disabled={uploading}>
-            {uploading ? t("upload.uploading") : "↑"}
+            {uploading ? t("upload.uploading") : <Icon icon="tabler:arrow-up" />}
           </PrimaryButton>
         </form>
       </div>

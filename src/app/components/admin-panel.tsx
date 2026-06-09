@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
+import { Icon } from "@iconify/react";
 import { useI18n } from "../i18n";
 import { DangerButton } from "@/app/components/ui/button";
 import { FormField } from "@/app/components/ui/form-field";
@@ -31,7 +32,7 @@ export function AdminPanel({ busy, manageCode, onManageCodeChange, onSubmit }: A
 				/>
 			</FormField>
 			<DangerButton disabled={busy} type="submit">
-				<span aria-hidden="true">×</span>
+				<Icon icon="tabler:trash" aria-hidden="true" />
 				{busy ? t("admin.revoking") : t("admin.revokeFile")}
 			</DangerButton>
 		</form>

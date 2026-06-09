@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { useI18n } from "@/app/i18n";
 
 type TextPreviewBlockProps = {
@@ -32,7 +33,7 @@ export function TextPreviewBlock({ text, remainingDownloads, onCopy }: TextPrevi
           if (text) onCopy(text);
         }}
       >
-        <span aria-hidden="true">⧉</span>
+        <Icon icon="tabler:copy" aria-hidden="true" />
         {t("pickup.copyText")}
       </button>
     </div>

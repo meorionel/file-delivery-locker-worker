@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Icon } from "@iconify/react";
 import { GooeyToaster, gooeyToast } from "goey-toast";
 import { readApiJson } from "../../components/api-json";
 import type { ApiError, Delivery, DeliveryLookupResult, TextPreview } from "../../components/locker-types";
@@ -163,7 +164,7 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 						type="button"
 						onClick={openGuestDelivery}
 					>
-						<span aria-hidden="true">{delivery?.kind === "text" ? "⌕" : "↓"}</span>
+						<Icon icon={delivery?.kind === "text" ? "tabler:search" : "tabler:download"} aria-hidden="true" />
 						{busy ? t("guest.verifying") : delivery?.kind === "text" ? t("guest.viewText") : t("guest.download")}
 					</PrimaryButton>
 					{powStatus && <p className="panel-copy m-0 text-center">{powStatus}</p>}

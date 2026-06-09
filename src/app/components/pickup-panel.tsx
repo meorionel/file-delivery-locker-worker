@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
+import { Icon } from "@iconify/react";
 import { useI18n } from "../i18n";
 import type { Delivery, TextPreview } from "./locker-types";
 import { PickupCodeInput } from "./pickup-code-input";
@@ -51,7 +52,7 @@ export function PickupPanel({
 			</div>
 			<PickupCodeInput value={pickupCode} onChange={onPickupCodeChange} />
 			<SecondaryButton disabled={busy} type="submit">
-				<span aria-hidden="true">⌕</span>
+				<Icon icon="tabler:search" aria-hidden="true" />
 				{busy ? t("pickup.searching") : t("pickup.search")}
 			</SecondaryButton>
 			{powStatus && <p className="panel-copy m-0 text-center">{powStatus}</p>}
@@ -73,7 +74,7 @@ export function PickupPanel({
 							type="button"
 							onClick={onDownload}
 						>
-							<span aria-hidden="true">↓</span>
+							<Icon icon="tabler:download" aria-hidden="true" />
 							{downloading ? t("pickup.downloading") : t("pickup.download")}
 						</PrimaryButton>
 					)}
