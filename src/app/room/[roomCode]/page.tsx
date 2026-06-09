@@ -17,10 +17,8 @@ export default async function RoomCodePage({
 
   if (demoMode) {
     return (
-      <main className="app-shell min-h-screen">
-        <section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
-          <RoomViewDemoWrapper roomCode={roomCode} />
-        </section>
+      <main className="app-shell">
+        <RoomViewDemoWrapper roomCode={roomCode} />
       </main>
     );
   }
@@ -39,10 +37,8 @@ export default async function RoomCodePage({
   }
 
   return (
-    <main className="app-shell min-h-screen">
-      <section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
-        <RoomView roomCode={roomCode} joinToken={joinToken} />
-      </section>
+    <main className="app-shell">
+      <RoomView roomCode={roomCode} joinToken={joinToken} />
     </main>
   );
 }

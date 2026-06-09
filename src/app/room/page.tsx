@@ -7,10 +7,8 @@ export default async function RoomPage() {
   const demoMode = await getDemoMode();
   if (demoMode) {
     return (
-      <main className="app-shell min-h-screen">
-        <section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
-          <RoomGate demoMode={demoMode} />
-        </section>
+      <main className="app-shell flex min-h-screen items-center justify-center px-5">
+        <RoomGate demoMode={demoMode} />
       </main>
     );
   }
@@ -25,10 +23,8 @@ export default async function RoomPage() {
   }
 
   return (
-    <main className="app-shell min-h-screen">
-      <section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
-        <RoomGate demoMode={demoMode} />
-      </section>
+    <main className="app-shell flex min-h-screen items-center justify-center px-5">
+      <RoomGate demoMode={demoMode} />
     </main>
   );
 }

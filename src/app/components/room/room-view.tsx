@@ -29,6 +29,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
   const wsRef = useRef<ReturnType<typeof createRoomWebSocket> | null>(null);
   const wsAvailable = useRef(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   function handleExitRoom() {
     clearRoomState();
@@ -175,34 +176,36 @@ export function RoomView({ roomCode, joinToken }: Props) {
         : t("room.connecting");
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="room-header">
-        <div className="room-header-info">
-          <div className="room-header-actions">
-            <button className="room-header-action-btn" onClick={handleExitRoom} title={t("room.exitRoom")}>
-              {t("room.exitRoom")}
-            </button>
-            <button className="room-header-action-btn" onClick={handleCopyCode} title={t("room.copyCode")}>
-              {t("room.copyCode")}
-            </button>
+    <div className="flex h-screen flex-col">
+      <div className="mx-auto w-full max-w-[1200px] px-5 pt-6 sm:px-8 min-[960px]:px-10">
+        <div className="room-header">
+          <div className="room-header-info">
+            <div className="room-header-actions">
+              <button className="room-header-action-btn" onClick={handleExitRoom} title={t("room.exitRoom")}>
+                {t("room.exitRoom")}
+              </button>
+              <button className="room-header-action-btn" onClick={handleCopyCode} title={t("room.copyCode")}>
+                {t("room.copyCode")}
+              </button>
+            </div>
+            <h2 className="room-title">
+              {t("room.roomCode")}: <strong>{roomCode}</strong>
+            </h2>
+            <span className={`room-status room-status-${status}`}>
+              {statusText}
+            </span>
           </div>
-          <h2 className="room-title">
-            {t("room.roomCode")}: <strong>{roomCode}</strong>
-          </h2>
-          <span className={`room-status room-status-${status}`}>
-            {statusText}
-          </span>
         </div>
       </div>
 
-      <div className="grid gap-6 min-[960px]:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] min-[960px]:items-start">
-        <RoomUploadBar roomCode={roomCode} joinToken={joinToken} onUploaded={requestSync} />
-
-        <div className="panel panel-dark flex flex-col gap-5">
+      <div ref={listRef} className="mx-auto w-full max-w-[1200px] flex-1 overflow-y-auto px-5 pb-4 sm:px-8 min-[960px]:px-10">
+        <div className="panel panel-dark mt-6 flex flex-col gap-5">
           <h2>{t("room.fileList")}</h2>
           <RoomFileList files={files} onDownload={handleDownload} onPreview={handlePreview} />
         </div>
       </div>
+
+      <RoomUploadBar roomCode={roomCode} joinToken={joinToken} onUploaded={requestSync} />
 
       {previewFile && previewText && (
         <RoomFileModal

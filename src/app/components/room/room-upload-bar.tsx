@@ -4,7 +4,6 @@ import { type FormEvent, useRef, useState } from "react";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 import { PrimaryButton } from "@/app/components/ui/button";
-import { Switch } from "@/app/components/ui/switch";
 import type { DeliveryKind, UploadFileResult } from "./room-types";
 
 type Props = {
@@ -23,6 +22,10 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function toggleKind() {
+    setKind(kind === "file" ? "text" : "file");
+  }
 
   async function handleUpload(event: FormEvent) {
     event.preventDefault();
@@ -98,52 +101,48 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
   }
 
   return (
-    <form className="panel panel-feature flex flex-col gap-6" onSubmit={handleUpload}>
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h2>{kind === "text" ? t("room.uploadText") : t("room.uploadFile")}</h2>
-        </div>
+    <div className="room-chat-bar">
+      <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3 px-5 sm:px-8 min-[960px]:px-10">
+        <button
+          type="button"
+          className="room-chat-toggle"
+          onClick={toggleKind}
+          title={kind === "file" ? t("room.uploadText") : t("room.uploadFile")}
+        >
+          {kind === "file" ? t("room.uploadFile").slice(0, 2) : t("room.uploadText").slice(0, 2)}
+        </button>
+
+        <form className="flex flex-1 items-center gap-3" onSubmit={handleUpload}>
+          {kind === "text" ? (
+            <input
+              className="room-chat-input"
+              type="text"
+              value={textContent}
+              onChange={(e) => setTextContent(e.target.value)}
+              placeholder={t("upload.textPlaceholder")}
+              disabled={uploading}
+            />
+          ) : (
+            <label className="room-chat-file-label">
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="sr-only"
+                onChange={handleFileChange}
+              />
+              <span className={selectedFile ? "" : "room-chat-file-placeholder"}>
+                {selectedFile ? selectedFile.name : t("upload.chooseFile")}
+              </span>
+            </label>
+          )}
+
+          <PrimaryButton type="submit" disabled={uploading}>
+            {uploading ? t("upload.uploading") : "↑"}
+          </PrimaryButton>
+        </form>
       </div>
 
-      <div className="flex justify-center w-full">
-        <Switch
-          checked={kind === "text"}
-          onChange={() => setKind(kind === "text" ? "file" : "text")}
-          leftLabel={t("upload.modeFile")}
-          rightLabel={t("upload.modeText")}
-          ariaLabel={t("upload.switchKind")}
-        />
-      </div>
-
-      {kind === "text" ? (
-        <div className="text-dropzone field flex flex-col gap-3">
-          <textarea
-            className="h-[140px] w-full resize-none"
-            value={textContent}
-            onChange={(e) => setTextContent(e.target.value)}
-            placeholder={t("upload.textPlaceholder")}
-          />
-        </div>
-      ) : (
-        <label className="dropzone flex min-h-[140px] flex-col items-center justify-center gap-2.5 cursor-pointer">
-          <input
-            ref={fileInputRef}
-            className="sr-only"
-            type="file"
-            onChange={handleFileChange}
-          />
-          <span className="text-4xl">+</span>
-          <span className="font-medium">
-            {selectedFile ? selectedFile.name : t("upload.chooseFile")}
-          </span>
-        </label>
-      )}
-
-      <PrimaryButton type="submit" disabled={uploading}>
-        {uploading ? t("upload.uploading") : kind === "text" ? t("room.uploadText") : t("room.uploadFile")}
-      </PrimaryButton>
-
-      {error && <p className="auth-error">{error}</p>}
-    </form>
+      {error && <p className="room-chat-error">{error}</p>}
+    </div>
   );
 }
