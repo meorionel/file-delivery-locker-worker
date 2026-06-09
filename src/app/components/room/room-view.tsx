@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { GooeyToaster, gooeyToast } from "goey-toast";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 import { getDownloadFileName } from "@/lib/file";
+import { clearRoomState } from "@/app/components/mode-nav-switch";
 import { RoomUploadBar } from "./room-upload-bar";
 import { RoomFileList } from "./room-file-list";
 import { RoomFileModal } from "./room-file-modal";
@@ -18,6 +20,7 @@ type Props = {
 
 export function RoomView({ roomCode, joinToken }: Props) {
   const { t } = useI18n();
+  const router = useRouter();
   const [files, setFiles] = useState<RoomFile[]>([]);
   const [userCount, setUserCount] = useState(1);
   const [status, setStatus] = useState("connecting");
@@ -26,6 +29,24 @@ export function RoomView({ roomCode, joinToken }: Props) {
   const wsRef = useRef<ReturnType<typeof createRoomWebSocket> | null>(null);
   const wsAvailable = useRef(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function handleExitRoom() {
+    clearRoomState();
+    router.push("/room");
+  }
+
+  async function handleCopyCode() {
+    try {
+      await navigator.clipboard.writeText(roomCode);
+      gooeyToast.success(t("common.copy"), {
+        preset: "subtle",
+        showTimestamp: false,
+        showProgress: true,
+      });
+    } catch {
+      // Clipboard API may be unavailable
+    }
+  }
 
   /** Fetch file list via REST API (fallback when WebSocket is unavailable) */
   const fetchFilesRest = useCallback(async () => {
@@ -157,6 +178,14 @@ export function RoomView({ roomCode, joinToken }: Props) {
     <div className="flex flex-col gap-6">
       <div className="room-header">
         <div className="room-header-info">
+          <div className="room-header-actions">
+            <button className="room-header-action-btn" onClick={handleExitRoom} title={t("room.exitRoom")}>
+              {t("room.exitRoom")}
+            </button>
+            <button className="room-header-action-btn" onClick={handleCopyCode} title={t("room.copyCode")}>
+              {t("room.copyCode")}
+            </button>
+          </div>
           <h2 className="room-title">
             {t("room.roomCode")}: <strong>{roomCode}</strong>
           </h2>

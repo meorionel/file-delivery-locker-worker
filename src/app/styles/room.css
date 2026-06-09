@@ -69,6 +69,35 @@
   gap: 12px;
 }
 
+.room-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.room-header-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 120ms ease;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.room-header-action-btn:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
 .room-title {
   font-family: var(--font-display);
   font-size: 28px;
