@@ -1,7 +1,9 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { GooeyToaster } from "goey-toast";
 import { readApiJson } from "./components/api-json";
+import { notify } from "@/lib/notify";
 import { useI18n } from "./i18n";
 import { PrimaryButton } from "@/app/components/ui/button";
 import { FormField } from "@/app/components/ui/form-field";
@@ -13,12 +15,10 @@ type AuthResponse = {
 export default function PasswordGate({ redirectTo }: { redirectTo?: string }) {
 	const { t } = useI18n();
 	const [password, setPassword] = useState("");
-	const [error, setError] = useState("");
 	const [busy, setBusy] = useState(false);
 
 	async function enterSite(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setError("");
 		setBusy(true);
 
 		try {
@@ -36,7 +36,7 @@ export default function PasswordGate({ redirectTo }: { redirectTo?: string }) {
 
 			window.location.href = redirectTo ?? "/";
 		} catch (authError) {
-			setError(authError instanceof Error ? authError.message : t("auth.passwordIncorrect"));
+			notify(authError instanceof Error ? authError.message : t("auth.passwordIncorrect"), "error");
 		} finally {
 			setBusy(false);
 		}
@@ -57,12 +57,12 @@ export default function PasswordGate({ redirectTo }: { redirectTo?: string }) {
 							onChange={(event) => setPassword(event.target.value)}
 						/>
 					</FormField>
-					{error ? <p className="auth-error">{error}</p> : null}
 					<PrimaryButton disabled={busy} type="submit">
 						{busy ? t("auth.verifying") : t("auth.enterSite")}
 					</PrimaryButton>
 				</form>
 			</section>
+			<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
 		</main>
 	);
 }

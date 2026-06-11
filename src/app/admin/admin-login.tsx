@@ -1,6 +1,8 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { GooeyToaster } from "goey-toast";
+import { notify } from "@/lib/notify";
 import { useI18n } from "../i18n";
 import { readApiJson } from "../components/api-json";
 import { PrimaryButton } from "@/app/components/ui/button";
@@ -13,12 +15,10 @@ type AuthResponse = {
 export default function AdminLogin() {
 	const { t } = useI18n();
 	const [password, setPassword] = useState("");
-	const [error, setError] = useState("");
 	const [busy, setBusy] = useState(false);
 
 	async function enterAdmin(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setError("");
 		setBusy(true);
 
 		try {
@@ -36,7 +36,7 @@ export default function AdminLogin() {
 
 			window.location.reload();
 		} catch (authError) {
-			setError(authError instanceof Error ? authError.message : t("auth.adminPasswordIncorrect"));
+			notify(authError instanceof Error ? authError.message : t("auth.adminPasswordIncorrect"), "error");
 		} finally {
 			setBusy(false);
 		}
@@ -57,12 +57,12 @@ export default function AdminLogin() {
 							onChange={(event) => setPassword(event.target.value)}
 						/>
 					</FormField>
-					{error ? <p className="auth-error">{error}</p> : null}
 					<PrimaryButton disabled={busy} type="submit">
 						{busy ? t("auth.verifying") : t("auth.enterAdmin")}
 					</PrimaryButton>
 				</form>
 			</section>
+			<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
 		</main>
 	);
 }

@@ -498,11 +498,14 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				room_code_hash TEXT NOT NULL,
 				expires_at INTEGER NOT NULL,
 				created_at INTEGER NOT NULL,
+				refresh_token_hash TEXT NOT NULL DEFAULT '',
+				refresh_expires_at INTEGER NOT NULL DEFAULT 0,
 				FOREIGN KEY (room_code_hash) REFERENCES rooms(code_hash)
 			)`
 		)
 		.run();
 
+	await ensureRoomJoinTokenColumns(db);
 	await createDatabaseIndexes(db);
 }
 
@@ -514,6 +517,18 @@ async function ensureFileDeliveryColumns(db: LockerDb) {
 		if (!existingColumns.has(name)) {
 			await addColumnIfMissing(db, "file_deliveries", name, definition);
 		}
+	}
+}
+
+async function ensureRoomJoinTokenColumns(db: LockerDb) {
+	const columns = await db.prepare("PRAGMA table_info(rooms_join_tokens)").all<TableColumnRow>();
+	const existingColumns = new Set((columns.results ?? []).map((column) => column.name));
+
+	if (!existingColumns.has("refresh_token_hash")) {
+		await addColumnIfMissing(db, "rooms_join_tokens", "refresh_token_hash", "TEXT NOT NULL DEFAULT ''");
+	}
+	if (!existingColumns.has("refresh_expires_at")) {
+		await addColumnIfMissing(db, "rooms_join_tokens", "refresh_expires_at", "INTEGER NOT NULL DEFAULT 0");
 	}
 }
 
@@ -552,6 +567,7 @@ async function createDatabaseIndexes(db: LockerDb) {
 		"CREATE INDEX IF NOT EXISTS idx_room_files_expires ON room_files (expires_at)",
 		"CREATE INDEX IF NOT EXISTS idx_rooms_last_activity ON rooms (last_activity_at)",
 		"CREATE INDEX IF NOT EXISTS idx_rooms_join_tokens_expires ON rooms_join_tokens (expires_at)",
+		"CREATE INDEX IF NOT EXISTS idx_rooms_join_tokens_refresh ON rooms_join_tokens (refresh_expires_at)",
 	];
 
 	for (const statement of statements) {

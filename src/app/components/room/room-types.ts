@@ -17,8 +17,17 @@ export interface RoomInfo {
 
 export interface JoinResult {
 	joinToken: string;
+	refreshToken: string;
 	roomCode: string;
 	expiresAt: string;
+	refreshExpiresAt: string;
+	error?: string;
+}
+
+export interface RefreshResult {
+	joinToken: string;
+	expiresAt: string;
+	error?: string;
 }
 
 export interface UploadFileResult {

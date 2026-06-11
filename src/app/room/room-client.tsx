@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GooeyToaster } from "goey-toast";
 import { RoomView } from "../components/room/room-view";
+import { notify } from "@/lib/notify";
 import { readApiJson } from "../components/api-json";
 import { useI18n } from "../i18n";
 
 export function RoomViewDemoWrapper({ roomCode }: { roomCode: string }) {
 	const { t } = useI18n();
 	const [joinToken, setJoinToken] = useState<string | null>(null);
-	const [error, setError] = useState("");
+	const [failed, setFailed] = useState(false);
 
 	useEffect(() => {
 		async function join() {
@@ -22,14 +24,20 @@ export function RoomViewDemoWrapper({ roomCode }: { roomCode: string }) {
 				}
 				setJoinToken(data.joinToken);
 			} catch (err) {
-				setError(err instanceof Error ? err.message : t("message.roomJoinFailed"));
+				notify(err instanceof Error ? err.message : t("message.roomJoinFailed"), "error");
+				setFailed(true);
 			}
 		}
 		join();
 	}, [roomCode, t]);
 
-	if (error) {
-		return <p className="auth-error">{error}</p>;
+	if (failed) {
+		return (
+			<>
+				<p>{t("room.connecting")}</p>
+				<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
+			</>
+		);
 	}
 
 	if (!joinToken) {

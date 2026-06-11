@@ -2,6 +2,7 @@
 
 import { type FormEvent, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
+import { notify } from "@/lib/notify";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 import { PrimaryButton } from "@/app/components/ui/button";
@@ -21,7 +22,6 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
 	const [textContent, setTextContent] = useState("");
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
-	const [error, setError] = useState("");
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	function toggleKind() {
@@ -30,7 +30,6 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
 
 	async function handleUpload(event: FormEvent) {
 		event.preventDefault();
-		setError("");
 
 		let body: BodyInit;
 		let contentType: string;
@@ -38,12 +37,12 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
 
 		if (kind === "text") {
 			if (!textContent.trim()) {
-				setError(t("message.enterText"));
+				notify(t("message.enterText"), "error");
 				return;
 			}
 			const textBytes = new TextEncoder().encode(textContent);
 			if (textBytes.length > MAX_TEXT_SIZE) {
-				setError(t("message.textTooLarge"));
+				notify(t("message.textTooLarge"), "error");
 				return;
 			}
 			body = new Blob([textContent], { type: "text/plain;charset=utf-8" });
@@ -51,11 +50,11 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
 			fileName = "stored-text.txt";
 		} else {
 			if (!selectedFile) {
-				setError(t("message.chooseFile"));
+				notify(t("message.chooseFile"), "error");
 				return;
 			}
 			if (selectedFile.size > 100 * 1024 * 1024) {
-				setError(t("message.fileTooLarge"));
+				notify(t("message.fileTooLarge"), "error");
 				return;
 			}
 			body = selectedFile;
@@ -85,7 +84,7 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
 			if (fileInputRef.current) fileInputRef.current.value = "";
 			onUploaded();
 		} catch (err) {
-			setError(err instanceof Error ? err.message : t("message.roomUploadFailed"));
+			notify(err instanceof Error ? err.message : t("message.roomUploadFailed"), "error");
 		} finally {
 			setUploading(false);
 		}
@@ -145,8 +144,6 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
 					</PrimaryButton>
 				</form>
 			</div>
-
-			{error && <p className="mt-2 px-4 text-center text-[13px] text-[var(--error)]">{error}</p>}
 		</div>
 	);
 }

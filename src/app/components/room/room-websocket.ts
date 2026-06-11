@@ -11,17 +11,22 @@ type WebSocketHandlers = {
 };
 
 export function createRoomWebSocket(roomCode: string, joinToken: string, handlers: WebSocketHandlers) {
+	let currentToken = joinToken;
 	let ws: WebSocket | null = null;
 	let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 	let pingInterval: ReturnType<typeof setInterval> | null = null;
 	let destroyed = false;
 	let retryCount = 0;
 
+	function getWebSocketUrl() {
+		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		return `${protocol}//${window.location.host}/api/rooms/ws?code=${encodeURIComponent(roomCode)}&token=${encodeURIComponent(currentToken)}`;
+	}
+
 	function connect() {
 		if (destroyed) return;
 
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const url = `${protocol}//${window.location.host}/api/rooms/ws?code=${encodeURIComponent(roomCode)}&token=${encodeURIComponent(joinToken)}`;
+		const url = getWebSocketUrl();
 
 		handlers.onStatusChange("connecting");
 
@@ -113,6 +118,30 @@ export function createRoomWebSocket(roomCode: string, joinToken: string, handler
 		}, 3000);
 	}
 
+	/** Update the join token and reconnect with the new token */
+	function updateToken(newToken: string): void {
+		currentToken = newToken;
+		if (destroyed) return;
+
+		// Disconnect existing connection and reconnect with the new token
+		stopPing();
+		if (reconnectTimer) {
+			clearTimeout(reconnectTimer);
+			reconnectTimer = null;
+		}
+		if (ws) {
+			ws.onclose = null;
+			ws.onerror = null;
+			ws.onmessage = null;
+			if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+				ws.close(1000, "Token refresh");
+			}
+			ws = null;
+		}
+		retryCount = 0;
+		connect();
+	}
+
 	function requestSync() {
 		send({ type: "syncRequest" });
 	}
@@ -137,5 +166,5 @@ export function createRoomWebSocket(roomCode: string, joinToken: string, handler
 
 	connect();
 
-	return { requestSync, destroy };
+	return { requestSync, updateToken, destroy };
 }

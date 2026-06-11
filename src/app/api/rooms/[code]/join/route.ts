@@ -1,9 +1,9 @@
 import type { NextRequest } from "next/server";
 import { createCode } from "@/lib/locker";
 import { getCloudflareBindings, json, requireSiteAuth } from "@/lib/locker";
-import { hashRoomCode, hashJoinToken, JOIN_TOKEN_MAX_AGE_MS } from "@/server/room-utils";
+import { hashRoomCode, hashAccessToken, hashRefreshToken, JOIN_TOKEN_MAX_AGE_MS, REFRESH_TOKEN_MAX_AGE_MS } from "@/server/room-utils";
 
-// POST /api/rooms/[code]/join — validate room + get join token
+// POST /api/rooms/[code]/join — validate room + get access & refresh tokens
 export async function POST(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
 	const authError = await requireSiteAuth(request);
 	if (authError) return authError;
@@ -25,22 +25,26 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 		return json({ error: "Room not found" }, 404);
 	}
 
-	// Create join token
+	// Create access token (5 min) and refresh token (12 h)
 	const now = Date.now();
-	const token = createCode(16);
-	const tokenHash = await hashJoinToken(token);
+	const accessToken = createCode(16);
+	const refreshToken = createCode(16);
+	const accessTokenHash = await hashAccessToken(accessToken);
+	const refreshTokenHash = await hashRefreshToken(refreshToken);
 
 	await db
 		.prepare(
-			`INSERT INTO rooms_join_tokens (token_hash, room_code_hash, expires_at, created_at)
-       VALUES (?, ?, ?, ?)`
+			`INSERT INTO rooms_join_tokens (token_hash, room_code_hash, expires_at, created_at, refresh_token_hash, refresh_expires_at)
+       VALUES (?, ?, ?, ?, ?, ?)`
 		)
-		.bind(tokenHash, codeHash, now + JOIN_TOKEN_MAX_AGE_MS, now)
+		.bind(accessTokenHash, codeHash, now + JOIN_TOKEN_MAX_AGE_MS, now, refreshTokenHash, now + REFRESH_TOKEN_MAX_AGE_MS)
 		.run();
 
 	return json({
-		joinToken: token,
+		joinToken: accessToken,
+		refreshToken,
 		roomCode: normalizedCode,
 		expiresAt: new Date(now + JOIN_TOKEN_MAX_AGE_MS).toISOString(),
+		refreshExpiresAt: new Date(now + REFRESH_TOKEN_MAX_AGE_MS).toISOString(),
 	});
 }

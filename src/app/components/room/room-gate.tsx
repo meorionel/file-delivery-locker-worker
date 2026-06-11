@@ -1,15 +1,27 @@
 "use client";
 
 import { useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
+import { GooeyToaster } from "goey-toast";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
+import { notify } from "@/lib/notify";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
 import { PrimaryButton } from "@/app/components/ui/button";
+import type { JoinResult } from "./room-types";
 
 type Props = {
 	demoMode: boolean;
 };
+
+function storeRoomTokens(roomCode: string, refreshToken: string, expiresAt: string): void {
+	try {
+		sessionStorage.setItem(`room-refresh-token:${roomCode}`, refreshToken);
+		sessionStorage.setItem(`room-expires-at:${roomCode}`, expiresAt);
+	} catch {
+		// sessionStorage may be unavailable
+	}
+}
 
 export function RoomGate({ demoMode }: Props) {
 	const router = useRouter();
@@ -17,7 +29,6 @@ export function RoomGate({ demoMode }: Props) {
 	const [joinCode, setJoinCode] = useState("");
 	const [creating, setCreating] = useState(false);
 	const [joining, setJoining] = useState(false);
-	const [error, setError] = useState("");
 
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 	const chars = Array.from({ length: 6 }, (_, index) => joinCode[index] ?? "");
@@ -82,7 +93,6 @@ export function RoomGate({ demoMode }: Props) {
 
 	async function handleCreate() {
 		if (demoMode) return;
-		setError("");
 		setCreating(true);
 		try {
 			const response = await fetch("/api/rooms", { method: "POST" });
@@ -92,14 +102,15 @@ export function RoomGate({ demoMode }: Props) {
 			}
 
 			const joinResp = await fetch(`/api/rooms/${encodeURIComponent(data.code)}/join`, { method: "POST" });
-			const joinData = await readApiJson<{ error?: string; joinToken?: string; roomCode?: string }>(joinResp, t("message.roomJoinFailed"));
+			const joinData = await readApiJson<JoinResult>(joinResp, t("message.roomJoinFailed"));
 			if (!joinResp.ok || !joinData.joinToken) {
-				throw new Error(joinData.error ?? t("message.roomJoinFailed"));
+				throw new Error((joinData as { error?: string }).error ?? t("message.roomJoinFailed"));
 			}
 
+			storeRoomTokens(data.code, joinData.refreshToken, joinData.expiresAt);
 			router.push(`/room/${encodeURIComponent(data.code)}?token=${encodeURIComponent(joinData.joinToken)}`);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : t("message.roomCreateFailed"));
+			notify(err instanceof Error ? err.message : t("message.roomCreateFailed"), "error");
 		} finally {
 			setCreating(false);
 		}
@@ -113,22 +124,22 @@ export function RoomGate({ demoMode }: Props) {
 			.replace(/[^A-Z0-9]/g, "")
 			.slice(0, 6);
 		if (code.length !== 6) {
-			setError(t("room.enterRoomCode"));
+			notify(t("room.enterRoomCode"), "error");
 			return;
 		}
 
-		setError("");
 		setJoining(true);
 		try {
 			const response = await fetch(`/api/rooms/${encodeURIComponent(code)}/join`, { method: "POST" });
-			const data = await readApiJson<{ error?: string; joinToken?: string; roomCode?: string }>(response, t("message.roomJoinFailed"));
+			const data = await readApiJson<JoinResult>(response, t("message.roomJoinFailed"));
 			if (!response.ok || !data.joinToken) {
-				throw new Error(data.error ?? t("message.roomJoinFailed"));
+				throw new Error((data as { error?: string }).error ?? t("message.roomJoinFailed"));
 			}
 
+			storeRoomTokens(code, data.refreshToken, data.expiresAt);
 			router.push(`/room/${encodeURIComponent(code)}?token=${encodeURIComponent(data.joinToken)}`);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : t("message.roomJoinFailed"));
+			notify(err instanceof Error ? err.message : t("message.roomJoinFailed"), "error");
 		} finally {
 			setJoining(false);
 		}
@@ -184,7 +195,7 @@ export function RoomGate({ demoMode }: Props) {
 				</div>
 			</form>
 
-			{error && <p className="auth-error text-center">{error}</p>}
+			<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
 		</div>
 	);
 }

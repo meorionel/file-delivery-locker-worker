@@ -41,6 +41,8 @@ export interface RoomJoinTokenRow {
 	room_code_hash: string;
 	expires_at: number;
 	created_at: number;
+	refresh_token_hash: string;
+	refresh_expires_at: number;
 }
 
 // WebSocket message types

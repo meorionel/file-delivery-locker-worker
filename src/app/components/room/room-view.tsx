@@ -12,16 +12,52 @@ import { RoomUploadBar } from "./room-upload-bar";
 import { RoomFileList } from "./room-file-list";
 import { RoomFileModal } from "./room-file-modal";
 import { createRoomWebSocket } from "./room-websocket";
-import type { RoomFile, WsServerMessage } from "./room-types";
+import type { RoomFile, RefreshResult, WsServerMessage } from "./room-types";
+
+const REFRESH_MARGIN_MS = 60_000; // Refresh 1 minute before expiry
+const REFRESH_CHECK_INTERVAL_MS = 30_000; // Check every 30 seconds
 
 type Props = {
 	roomCode: string;
 	joinToken: string;
 };
 
-export function RoomView({ roomCode, joinToken }: Props) {
+function getStoredTokens(roomCode: string): { refreshToken: string | null; expiresAt: number | null } {
+	try {
+		const refreshToken = sessionStorage.getItem(`room-refresh-token:${roomCode}`);
+		const expiresAtStr = sessionStorage.getItem(`room-expires-at:${roomCode}`);
+		return {
+			refreshToken,
+			expiresAt: expiresAtStr ? new Date(expiresAtStr).getTime() : null,
+		};
+	} catch {
+		return { refreshToken: null, expiresAt: null };
+	}
+}
+
+function storeTokens(roomCode: string, refreshToken: string, expiresAt: string): void {
+	try {
+		sessionStorage.setItem(`room-refresh-token:${roomCode}`, refreshToken);
+		sessionStorage.setItem(`room-expires-at:${roomCode}`, expiresAt);
+	} catch {
+		// sessionStorage may be unavailable
+	}
+}
+
+function clearStoredTokens(roomCode: string): void {
+	try {
+		sessionStorage.removeItem(`room-refresh-token:${roomCode}`);
+		sessionStorage.removeItem(`room-expires-at:${roomCode}`);
+	} catch {
+		// sessionStorage may be unavailable
+	}
+}
+
+export function RoomView({ roomCode, joinToken: initialJoinToken }: Props) {
 	const { t } = useI18n();
 	const router = useRouter();
+	const [joinToken, setJoinToken] = useState(initialJoinToken);
+	const joinTokenRef = useRef(joinToken);
 	const [files, setFiles] = useState<RoomFile[]>([]);
 	const [userCount, setUserCount] = useState(1);
 	const [status, setStatus] = useState("connecting");
@@ -31,9 +67,107 @@ export function RoomView({ roomCode, joinToken }: Props) {
 	const wsAvailable = useRef(false);
 	const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const listRef = useRef<HTMLDivElement>(null);
+	const refreshTokenRef = useRef<string | null>(null);
+	const expiresAtRef = useRef<number>(0);
+
+	// Keep joinTokenRef in sync with joinToken state
+	useEffect(() => {
+		joinTokenRef.current = joinToken;
+	}, [joinToken]);
+
+	// Initialize tokens from sessionStorage on mount
+	useEffect(() => {
+		const { refreshToken, expiresAt } = getStoredTokens(roomCode);
+		refreshTokenRef.current = refreshToken;
+		expiresAtRef.current = expiresAt ?? 0;
+	}, [roomCode]);
+
+	// Attempt to refresh the access token
+	const refreshAccessToken = useCallback(async () => {
+		const storedRefreshToken = refreshTokenRef.current;
+		if (!storedRefreshToken) return false;
+
+		try {
+			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/refresh`, {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ refreshToken: storedRefreshToken }),
+			});
+			const data = await readApiJson<RefreshResult>(response, "refresh");
+			if (!response.ok || !data.joinToken) {
+				throw new Error((data as { error?: string }).error ?? "Refresh failed");
+			}
+
+			// Update token state
+			setJoinToken(data.joinToken);
+			expiresAtRef.current = new Date(data.expiresAt).getTime();
+
+			// Update sessionStorage expiry
+			storeTokens(roomCode, storedRefreshToken, data.expiresAt);
+
+			// Reconnect WebSocket with the new token
+			wsRef.current?.updateToken(data.joinToken);
+
+			return true;
+		} catch {
+			// Refresh token is invalid/expired — clear stored tokens
+			clearStoredTokens(roomCode);
+			refreshTokenRef.current = null;
+			expiresAtRef.current = 0;
+			return false;
+		}
+	}, [roomCode]);
+
+	// Check if token needs refresh and do it
+	const checkAndRefresh = useCallback(async () => {
+		const now = Date.now();
+		const expiresAt = expiresAtRef.current;
+
+		// No refresh token available — nothing to do
+		if (!refreshTokenRef.current) return;
+
+		// Token is still valid for more than the margin
+		if (expiresAt > 0 && now < expiresAt - REFRESH_MARGIN_MS) return;
+
+		// Token is expired or about to expire — refresh
+		const success = await refreshAccessToken();
+		if (!success) {
+			// Refresh failed — redirect to room gate
+			clearRoomState();
+			router.push("/room");
+		}
+	}, [refreshAccessToken, router]);
+
+	// On mount: check if the initial token is already expired
+	useEffect(() => {
+		const { refreshToken, expiresAt } = getStoredTokens(roomCode);
+		refreshTokenRef.current = refreshToken;
+		expiresAtRef.current = expiresAt ?? 0;
+
+		// If the access token from URL is expired and we have a refresh token, refresh immediately
+		const now = Date.now();
+		if (refreshToken && expiresAt && now >= expiresAt) {
+			refreshAccessToken().then((success) => {
+				if (!success) {
+					clearStoredTokens(roomCode);
+					clearRoomState();
+					router.push("/room");
+				}
+			});
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+	// Periodic check for token refresh
+	useEffect(() => {
+		const interval = setInterval(() => {
+			checkAndRefresh();
+		}, REFRESH_CHECK_INTERVAL_MS);
+		return () => clearInterval(interval);
+	}, [checkAndRefresh]);
 
 	function handleExitRoom() {
 		clearRoomState();
+		clearStoredTokens(roomCode);
 		router.push("/room");
 	}
 
@@ -53,7 +187,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
 	/** Fetch file list via REST API (fallback when WebSocket is unavailable) */
 	const fetchFilesRest = useCallback(async () => {
 		try {
-			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files`, { headers: { "x-join-token": joinToken } });
+			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files`, { headers: { "x-join-token": joinTokenRef.current } });
 			const data = await readApiJson<{ error?: string; files?: RoomFile[] }>(response, "fetchFiles");
 			if (response.ok && data.files) {
 				setFiles(data.files);
@@ -61,7 +195,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
 		} catch {
 			// Silently fail — will retry on next upload
 		}
-	}, [roomCode, joinToken]);
+	}, [roomCode]);
 
 	const handleSync = useCallback((msg: WsServerMessage & { type: "sync" }) => {
 		setFiles(msg.files);
@@ -87,7 +221,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
 
 	useEffect(() => {
 		wsAvailable.current = true;
-		wsRef.current = createRoomWebSocket(roomCode, joinToken, {
+		wsRef.current = createRoomWebSocket(roomCode, joinTokenRef.current, {
 			onSync: handleSync,
 			onUserCount: handleUserCount,
 			onError: handleError,
@@ -103,7 +237,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
 				pollingRef.current = null;
 			}
 		};
-	}, [roomCode, joinToken, handleSync, handleUserCount, handleError, handleStatusChange, handleWsUnavailable]);
+	}, [roomCode, handleSync, handleUserCount, handleError, handleStatusChange, handleWsUnavailable]);
 
 	/** Called after upload. If WebSocket is down, refresh via REST. */
 	function requestSync() {
@@ -116,7 +250,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
 
 	async function handleDownload(file: RoomFile) {
 		try {
-			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files/${encodeURIComponent(file.id)}/download`, { headers: { "x-join-token": joinToken } });
+			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files/${encodeURIComponent(file.id)}/download`, { headers: { "x-join-token": joinTokenRef.current } });
 			if (!response.ok) {
 				await readApiJson<{ error?: string }>(response, t("message.downloadFailed"));
 				throw new Error(t("message.downloadFailed"));
@@ -143,7 +277,7 @@ export function RoomView({ roomCode, joinToken }: Props) {
 	async function handlePreview(file: RoomFile) {
 		setPreviewFile(file);
 		try {
-			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files/${encodeURIComponent(file.id)}/preview`, { headers: { "x-join-token": joinToken } });
+			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files/${encodeURIComponent(file.id)}/preview`, { headers: { "x-join-token": joinTokenRef.current } });
 			const data = await readApiJson<{ error?: string; text?: string }>(response, t("message.previewFailed"));
 			if (!response.ok || data.text === undefined) {
 				throw new Error(data.error ?? t("message.previewFailed"));

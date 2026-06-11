@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { GooeyToaster } from "goey-toast";
+import { notify } from "@/lib/notify";
 import { useI18n } from "../i18n";
 import { readApiJson } from "../components/api-json";
 import { formatBytes } from "../components/locker-format";
@@ -107,13 +109,11 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 	const [searchInput, setSearchInput] = useState("");
 	const [query, setQuery] = useState("");
 	const [busy, setBusy] = useState<"list" | "events" | "revoke" | "counts" | null>(null);
-	const [message, setMessage] = useState("");
 	const [editMaxDownloads, setEditMaxDownloads] = useState("");
 	const [editDownloadCount, setEditDownloadCount] = useState("");
 
 	const loadDeliveries = useCallback(async () => {
 		setBusy("list");
-		setMessage("");
 
 		try {
 			const params = new URLSearchParams({
@@ -140,7 +140,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 			setTotal(data.total);
 			setTotalPages(data.totalPages);
 		} catch (error) {
-			setMessage(error instanceof Error ? error.message : t("admin.listFailed"));
+			notify(error instanceof Error ? error.message : t("admin.listFailed"), "error");
 		} finally {
 			setBusy(null);
 		}
@@ -162,7 +162,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 	function beginEdit(delivery: AdminDelivery) {
 		if (demoMode) {
-			setMessage(t("admin.demoReadonlyMessage"));
+			notify(t("admin.demoReadonlyMessage"), "warning");
 			return;
 		}
 
@@ -173,7 +173,6 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 	async function loadEvents(delivery: AdminDelivery) {
 		setBusy("events");
-		setMessage("");
 		setEvents([]);
 		setEventDelivery(delivery);
 
@@ -187,7 +186,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 			setEvents(data.events);
 		} catch (error) {
 			setEvents([]);
-			setMessage(error instanceof Error ? error.message : t("admin.eventsFailed"));
+			notify(error instanceof Error ? error.message : t("admin.eventsFailed"), "error");
 		} finally {
 			setBusy(null);
 		}
@@ -195,7 +194,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 	async function revokeDelivery(delivery: AdminDelivery) {
 		if (demoMode) {
-			setMessage(t("admin.demoNoRevoke"));
+			notify(t("admin.demoNoRevoke"), "warning");
 			return;
 		}
 
@@ -204,7 +203,6 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 		}
 
 		setBusy("revoke");
-		setMessage("");
 
 		try {
 			const response = await fetch(`/api/admin/deliveries/${encodeURIComponent(delivery.id)}/revoke`, {
@@ -216,7 +214,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 				throw new Error(t("message.revokeFailed"));
 			}
 
-			setMessage(t("message.revoked"));
+			notify(t("message.revoked"), "success");
 			setActionDelivery((current) =>
 				current?.id === delivery.id
 					? {
@@ -229,7 +227,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 			);
 			await loadDeliveries();
 		} catch (error) {
-			setMessage(error instanceof Error ? error.message : t("message.revokeFailed"));
+			notify(error instanceof Error ? error.message : t("message.revokeFailed"), "error");
 		} finally {
 			setBusy(null);
 		}
@@ -237,7 +235,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 	async function saveCounts(delivery: AdminDelivery) {
 		if (demoMode) {
-			setMessage(t("admin.demoNoCounts"));
+			notify(t("admin.demoNoCounts"), "warning");
 			return;
 		}
 
@@ -245,17 +243,16 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 		const downloadCount = Number(editDownloadCount);
 
 		if (!Number.isInteger(maxDownloads) || maxDownloads < 1 || !Number.isInteger(downloadCount) || downloadCount < 0) {
-			setMessage(t("admin.invalidCounts"));
+			notify(t("admin.invalidCounts"), "error");
 			return;
 		}
 
 		if (downloadCount > maxDownloads) {
-			setMessage(t("admin.countExceeded"));
+			notify(t("admin.countExceeded"), "error");
 			return;
 		}
 
 		setBusy("counts");
-		setMessage("");
 
 		try {
 			const response = await fetch(`/api/admin/deliveries/${encodeURIComponent(delivery.id)}/counts`, {
@@ -285,10 +282,10 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 						}
 					: current
 			);
-			setMessage(t("admin.countsUpdated"));
+			notify(t("admin.countsUpdated"), "success");
 			await loadDeliveries();
 		} catch (error) {
-			setMessage(error instanceof Error ? error.message : t("admin.countsFailed"));
+			notify(error instanceof Error ? error.message : t("admin.countsFailed"), "error");
 		} finally {
 			setBusy(null);
 		}
@@ -355,8 +352,6 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 						{t("admin.search")}
 					</PrimaryButton>
 				</form>
-
-				{message ? <p className="auth-error">{message}</p> : null}
 
 				<section className="panel flex min-w-0 flex-col gap-4 overflow-hidden">
 					<div className="overflow-x-auto">
@@ -464,7 +459,6 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 			<Modal open={eventDelivery !== null} title={t("admin.events")} subtitle={eventDelivery?.fileName} onClose={() => setEventDelivery(null)} dark>
 				<div className="flex flex-col gap-3">
-					{message ? <p className="auth-error">{message}</p> : null}
 					{busy === "events" ? <p className="panel-copy">{t("common.loading")}</p> : null}
 					{events.map((event) => (
 						<div className="rounded-lg border border-[rgba(250,249,245,0.12)] p-3" key={event.id}>
@@ -490,7 +484,6 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 			<Modal open={actionDelivery !== null} title={t("admin.actions")} subtitle={actionDelivery?.fileName} onClose={() => setActionDelivery(null)}>
 				<div className="grid gap-5">
-					{message ? <p className="auth-error">{message}</p> : null}
 					<div className="grid gap-3 sm:grid-cols-2">
 						<FormField label={t("admin.maxDownloads")}>
 							<input
@@ -539,6 +532,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 					</div>
 				</div>
 			</Modal>
+			<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />
 		</main>
 	);
 }
