@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -17,9 +17,26 @@ execFileSync(bin, args, {
 	stdio: "inherit",
 });
 
-// After OpenNext build, ensure the worker-entry.mjs can resolve imports.
-// The worker-entry.mjs in scripts/ references ../.open-next/worker.js and
-// ../.open-next/server-functions/default/src/server/room-do.mjs.
-// During wrangler dev/deploy, these paths are relative to the worker entry's
-// location in the scripts/ directory and should resolve correctly since
-// wrangler uses the main field's directory as the base for bundling.
+// Compile the Room Durable Object class so worker-entry.mjs can import it.
+// The worker-entry.mjs imports ../.open-next/server-functions/default/src/server/room-do.mjs.
+// OpenNext Cloudflare bundles server functions into worker.js, so we need to
+// produce the .mjs file separately for wrangler to resolve during deploy bundling.
+const esbuild = path.join(root, "node_modules", ".bin", isWindows ? "esbuild.cmd" : "esbuild");
+const roomDoSource = path.join(root, "src", "server", "room-do.ts");
+const roomDoOutput = path.join(root, ".open-next", "server-functions", "default", "src", "server", "room-do.mjs");
+
+if (existsSync(roomDoSource)) {
+	mkdirSync(path.dirname(roomDoOutput), { recursive: true });
+	execFileSync(esbuild, [
+		roomDoSource,
+		"--format=esm",
+		"--target=es2022",
+		`--outfile=${roomDoOutput}`,
+		"--bundle",
+	], {
+		cwd: root,
+		env: process.env,
+		stdio: "inherit",
+	});
+	console.log(`Compiled ${path.relative(root, roomDoSource)} -> ${path.relative(root, roomDoOutput)}`);
+}
