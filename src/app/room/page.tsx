@@ -4,27 +4,27 @@ import { getDemoMode, getSiteAuthSession, getSitePassword, SITE_AUTH_COOKIE } fr
 import { RoomGate } from "../components/room/room-gate";
 
 export default async function RoomPage() {
-  const demoMode = await getDemoMode();
-  if (demoMode) {
-    return (
-      <main className="app-shell flex min-h-screen items-center justify-center px-5">
-        <RoomGate demoMode={demoMode} />
-      </main>
-    );
-  }
+	const demoMode = await getDemoMode();
+	if (demoMode) {
+		return (
+			<main className="app-shell flex min-h-screen items-center justify-center px-5">
+				<RoomGate demoMode={demoMode} />
+			</main>
+		);
+	}
 
-  const sitePassword = await getSitePassword();
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SITE_AUTH_COOKIE)?.value;
-  const session = await getSiteAuthSession(sitePassword, token);
+	const sitePassword = await getSitePassword();
+	const cookieStore = await cookies();
+	const token = cookieStore.get(SITE_AUTH_COOKIE)?.value;
+	const session = await getSiteAuthSession(sitePassword, token);
 
-  if (!session.valid) {
-    redirect("/auth?redirect=/room");
-  }
+	if (!session.valid) {
+		redirect("/auth?redirect=/room");
+	}
 
-  return (
-    <main className="app-shell flex min-h-screen items-center justify-center px-5">
-      <RoomGate demoMode={demoMode} />
-    </main>
-  );
+	return (
+		<main className="app-shell flex min-h-screen items-center justify-center px-5">
+			<RoomGate demoMode={demoMode} />
+		</main>
+	);
 }

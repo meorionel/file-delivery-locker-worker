@@ -3,51 +3,44 @@
 	"name": "file-delivery-locker-worker",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2026-05-09",
-	"compatibility_flags": [
-		"nodejs_compat",
-		"global_fetch_strictly_public"
-	],
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 	"assets": {
 		"binding": "ASSETS",
-		"directory": ".open-next/assets"
+		"directory": ".open-next/assets",
 	},
 	"images": {
 		// Enable image optimization.
 		// See https://opennext.js.org/cloudflare/howtos/image
-		"binding": "IMAGES"
+		"binding": "IMAGES",
 	},
 	"services": [
 		{
 			// Self-reference service binding. This service value should match `name`.
 			// See https://opennext.js.org/cloudflare/caching
 			"binding": "WORKER_SELF_REFERENCE",
-			"service": "file-delivery-locker-worker"
-		}
+			"service": "file-delivery-locker-worker",
+		},
 	],
 	"observability": {
 		"enabled": true,
-		"head_sampling_rate": 1
+		"head_sampling_rate": 1,
 	},
 	"upload_source_maps": true,
 	"vars": {
-		"DEMO_MODE": "false"
+		"DEMO_MODE": "false",
 	},
 	"secrets": {
-		"required": [
-			"SITE_PASSWORD",
-			"ADMIN_PASSWORD",
-			"PICKUP_CODE_PEPPER"
-		]
+		"required": ["SITE_PASSWORD", "ADMIN_PASSWORD", "PICKUP_CODE_PEPPER"],
 	},
 	"r2_buckets": [
 		{
-			"binding": "FILE_BUCKET"
-		}
+			"binding": "FILE_BUCKET",
+		},
 	],
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"migrations_dir": "migrations"
-		}
-	]
+			"migrations_dir": "migrations",
+		},
+	],
 }

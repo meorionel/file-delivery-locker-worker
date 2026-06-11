@@ -112,7 +112,7 @@ export async function GET(request: Request) {
 				`SELECT *
 				${baseQuery}
 				ORDER BY created_at DESC
-				LIMIT ? OFFSET ?`,
+				LIMIT ? OFFSET ?`
 			)
 			.bind(...queryBindings, pageSize, offset)
 			.all<AdminDeliveryRow>();
@@ -130,7 +130,7 @@ export async function GET(request: Request) {
 			JSON.stringify({
 				event: "admin_deliveries_read_failed",
 				error: error instanceof Error ? error.message : "unknown",
-			}),
+			})
 		);
 		return json({ error: "Unable to read deliveries." }, 500);
 	}

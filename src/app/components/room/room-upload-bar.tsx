@@ -8,146 +8,145 @@ import { PrimaryButton } from "@/app/components/ui/button";
 import type { DeliveryKind, UploadFileResult } from "./room-types";
 
 type Props = {
-  roomCode: string;
-  joinToken: string;
-  onUploaded: () => void;
+	roomCode: string;
+	joinToken: string;
+	onUploaded: () => void;
 };
 
 const MAX_TEXT_SIZE = 256 * 1024;
 
 export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
-  const { t } = useI18n();
-  const [kind, setKind] = useState<DeliveryKind>("file");
-  const [textContent, setTextContent] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+	const { t } = useI18n();
+	const [kind, setKind] = useState<DeliveryKind>("file");
+	const [textContent, setTextContent] = useState("");
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const [error, setError] = useState("");
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function toggleKind() {
-    setKind(kind === "file" ? "text" : "file");
-  }
+	function toggleKind() {
+		setKind(kind === "file" ? "text" : "file");
+	}
 
-  async function handleUpload(event: FormEvent) {
-    event.preventDefault();
-    setError("");
+	async function handleUpload(event: FormEvent) {
+		event.preventDefault();
+		setError("");
 
-    let body: BodyInit;
-    let contentType: string;
-    let fileName: string;
+		let body: BodyInit;
+		let contentType: string;
+		let fileName: string;
 
-    if (kind === "text") {
-      if (!textContent.trim()) {
-        setError(t("message.enterText"));
-        return;
-      }
-      const textBytes = new TextEncoder().encode(textContent);
-      if (textBytes.length > MAX_TEXT_SIZE) {
-        setError(t("message.textTooLarge"));
-        return;
-      }
-      body = new Blob([textContent], { type: "text/plain;charset=utf-8" });
-      contentType = "text/plain;charset=utf-8";
-      fileName = "stored-text.txt";
-    } else {
-      if (!selectedFile) {
-        setError(t("message.chooseFile"));
-        return;
-      }
-      if (selectedFile.size > 100 * 1024 * 1024) {
-        setError(t("message.fileTooLarge"));
-        return;
-      }
-      body = selectedFile;
-      contentType = selectedFile.type || "application/octet-stream";
-      fileName = selectedFile.name;
-    }
+		if (kind === "text") {
+			if (!textContent.trim()) {
+				setError(t("message.enterText"));
+				return;
+			}
+			const textBytes = new TextEncoder().encode(textContent);
+			if (textBytes.length > MAX_TEXT_SIZE) {
+				setError(t("message.textTooLarge"));
+				return;
+			}
+			body = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+			contentType = "text/plain;charset=utf-8";
+			fileName = "stored-text.txt";
+		} else {
+			if (!selectedFile) {
+				setError(t("message.chooseFile"));
+				return;
+			}
+			if (selectedFile.size > 100 * 1024 * 1024) {
+				setError(t("message.fileTooLarge"));
+				return;
+			}
+			body = selectedFile;
+			contentType = selectedFile.type || "application/octet-stream";
+			fileName = selectedFile.name;
+		}
 
-    setUploading(true);
-    try {
-      const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files`, {
-        method: "POST",
-        headers: {
-          "content-type": contentType,
-          "x-content-type": contentType,
-          "x-delivery-kind": kind,
-          "x-file-name": encodeURIComponent(fileName),
-          "x-join-token": joinToken,
-        },
-        body,
-      });
-      const data = await readApiJson<{ error?: string } & UploadFileResult>(
-        response,
-        t("message.roomUploadFailed")
-      );
-      if (!response.ok) {
-        throw new Error(data.error ?? t("message.roomUploadFailed"));
-      }
-      setTextContent("");
-      setSelectedFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      onUploaded();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("message.roomUploadFailed"));
-    } finally {
-      setUploading(false);
-    }
-  }
+		setUploading(true);
+		try {
+			const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/files`, {
+				method: "POST",
+				headers: {
+					"content-type": contentType,
+					"x-content-type": contentType,
+					"x-delivery-kind": kind,
+					"x-file-name": encodeURIComponent(fileName),
+					"x-join-token": joinToken,
+				},
+				body,
+			});
+			const data = await readApiJson<{ error?: string } & UploadFileResult>(response, t("message.roomUploadFailed"));
+			if (!response.ok) {
+				throw new Error(data.error ?? t("message.roomUploadFailed"));
+			}
+			setTextContent("");
+			setSelectedFile(null);
+			if (fileInputRef.current) fileInputRef.current.value = "";
+			onUploaded();
+		} catch (err) {
+			setError(err instanceof Error ? err.message : t("message.roomUploadFailed"));
+		} finally {
+			setUploading(false);
+		}
+	}
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  }
+	function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+		const file = event.target.files?.[0];
+		if (file) {
+			setSelectedFile(file);
+		}
+	}
 
-  return (
-    <div className="sticky bottom-0 bg-[var(--canvas)] border-t border-[var(--hairline)] py-3 z-50">
-      <div className="mx-auto flex w-full max-w-[1200px] items-start gap-6 px-5 sm:px-8 min-[960px]:px-10">
-        <button
-          type="button"
-          className="flex-none w-10 h-10 rounded-full border-0 bg-[var(--primary)] text-[var(--on-primary)] cursor-pointer flex items-center justify-center transition-colors duration-[120ms] leading-none hover:bg-[var(--primary-active)]"
-          onClick={toggleKind}
-          title={kind === "file" ? t("room.uploadText") : t("room.uploadFile")}
-        >
-          <Icon icon={kind === "file" ? "tabler:file-text" : "tabler:file"} className="text-lg" />
-        </button>
+	return (
+		<div className="sticky bottom-0 z-50 border-t border-[var(--hairline)] bg-[var(--canvas)] py-3">
+			<div className="mx-auto flex w-full max-w-[1200px] items-start gap-6 px-5 min-[960px]:px-10 sm:px-8">
+				<button
+					type="button"
+					className="flex h-10 w-10 flex-none cursor-pointer items-center justify-center rounded-full border-0 bg-[var(--primary)] leading-none text-[var(--on-primary)] transition-colors duration-[120ms] hover:bg-[var(--primary-active)]"
+					onClick={toggleKind}
+					title={kind === "file" ? t("room.uploadText") : t("room.uploadFile")}
+				>
+					<Icon icon={kind === "file" ? "tabler:file-text" : "tabler:file"} className="text-lg" />
+				</button>
 
-        <form className="flex flex-1 items-start gap-6" onSubmit={handleUpload}>
-          {kind === "text" ? (
-            <textarea
-              className="flex-1 min-w-0 h-10 border-2 border-dashed border-[var(--hairline)] rounded-xl bg-[var(--canvas)] text-[var(--ink)] px-4 py-3 text-sm outline-none resize-none focus:border-[var(--primary)] placeholder:text-[var(--muted-soft)] transition-colors duration-[120ms]"
-              value={textContent}
-              onChange={(e) => setTextContent(e.target.value)}
-              placeholder={t("upload.textPlaceholder")}
-              disabled={uploading}
-            />
-          ) : (
-            <label className="flex-1 min-w-0 h-10 flex items-center justify-between px-4 border-2 border-dashed border-[var(--hairline)] rounded-xl bg-[var(--canvas)] cursor-pointer transition-colors duration-[120ms] hover:border-[var(--primary)] hover:bg-[var(--surface-soft)]">
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="sr-only"
-                onChange={handleFileChange}
-              />
-              {selectedFile ? (
-                <span className="text-sm text-[var(--ink)]">{selectedFile.name}</span>
-              ) : (
-                <>
-                  <span className="text-sm text-[var(--muted)]">{t("upload.chooseFile")}</span>
-                  <Icon icon="tabler:cloud-upload" className="text-xl text-[var(--muted)]" />
-                </>
-              )}
-            </label>
-          )}
+				<form className="flex flex-1 items-start gap-6" onSubmit={handleUpload}>
+					{kind === "text" ? (
+						<textarea
+							className="h-10 min-w-0 flex-1 resize-none rounded-xl border-2 border-dashed border-[var(--hairline)] bg-[var(--canvas)] px-4 py-3 text-sm text-[var(--ink)] transition-colors duration-[120ms] outline-none placeholder:text-[var(--muted-soft)] focus:border-[var(--primary)]"
+							value={textContent}
+							onChange={(e) => setTextContent(e.target.value)}
+							placeholder={t("upload.textPlaceholder")}
+							disabled={uploading}
+						/>
+					) : (
+						<label className="flex h-10 min-w-0 flex-1 cursor-pointer items-center justify-between rounded-xl border-2 border-dashed border-[var(--hairline)] bg-[var(--canvas)] px-4 transition-colors duration-[120ms] hover:border-[var(--primary)] hover:bg-[var(--surface-soft)]">
+							<input ref={fileInputRef} type="file" className="sr-only" onChange={handleFileChange} />
+							{selectedFile ? (
+								<span className="text-sm text-[var(--ink)]">{selectedFile.name}</span>
+							) : (
+								<>
+									<span className="text-sm text-[var(--muted)]">{t("upload.chooseFile")}</span>
+									<Icon icon="tabler:cloud-upload" className="text-xl text-[var(--muted)]" />
+								</>
+							)}
+						</label>
+					)}
 
-          <PrimaryButton type="submit" disabled={uploading}>
-            {uploading ? t("upload.uploading") : <><Icon icon="tabler:send" />Send</>}
-          </PrimaryButton>
-        </form>
-      </div>
+					<PrimaryButton type="submit" disabled={uploading}>
+						{uploading ? (
+							t("upload.uploading")
+						) : (
+							<>
+								<Icon icon="tabler:send" />
+								Send
+							</>
+						)}
+					</PrimaryButton>
+				</form>
+			</div>
 
-      {error && <p className="mt-2 text-[var(--error)] text-[13px] text-center px-4">{error}</p>}
-    </div>
-  );
+			{error && <p className="mt-2 px-4 text-center text-[13px] text-[var(--error)]">{error}</p>}
+		</div>
+	);
 }

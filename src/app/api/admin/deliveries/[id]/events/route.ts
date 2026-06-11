@@ -57,7 +57,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 			FROM delivery_events
 			WHERE delivery_id = ?
 			ORDER BY created_at DESC
-			LIMIT 200`,
+			LIMIT 200`
 		)
 		.bind(id)
 		.all<DeliveryEventRow>();

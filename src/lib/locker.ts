@@ -154,7 +154,7 @@ const cap = new Cap({
 							challenge_difficulty,
 							expires_at,
 							created_at
-						) VALUES (?, ?, ?, ?, ?, ?)`,
+						) VALUES (?, ?, ?, ?, ?, ?)`
 					)
 					.bind(token, data.challenge.c, data.challenge.s, data.challenge.d, data.expires, Date.now())
 					.run();
@@ -169,7 +169,7 @@ const cap = new Cap({
 							challenge_difficulty,
 							expires_at
 						FROM cap_challenges
-						WHERE token = ?`,
+						WHERE token = ?`
 					)
 					.bind(token)
 					.first<{
@@ -204,17 +204,11 @@ const cap = new Cap({
 		tokens: {
 			store: async (tokenKey, expires) => {
 				const db = await getCapStorageDb();
-				await db
-					.prepare("INSERT OR REPLACE INTO cap_tokens (token_key, expires_at, created_at) VALUES (?, ?, ?)")
-					.bind(tokenKey, expires, Date.now())
-					.run();
+				await db.prepare("INSERT OR REPLACE INTO cap_tokens (token_key, expires_at, created_at) VALUES (?, ?, ?)").bind(tokenKey, expires, Date.now()).run();
 			},
 			get: async (tokenKey) => {
 				const db = await getCapStorageDb();
-				const row = await db
-					.prepare("SELECT expires_at FROM cap_tokens WHERE token_key = ?")
-					.bind(tokenKey)
-					.first<{ expires_at: number }>();
+				const row = await db.prepare("SELECT expires_at FROM cap_tokens WHERE token_key = ?").bind(tokenKey).first<{ expires_at: number }>();
 				return row ? Number(row.expires_at) : null;
 			},
 			delete: async (tokenKey) => {
@@ -353,7 +347,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				upload_country TEXT,
 				upload_region TEXT,
 				upload_city TEXT
-			)`,
+			)`
 		)
 		.run();
 
@@ -382,7 +376,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				next_download_count INTEGER,
 				created_at INTEGER NOT NULL,
 				FOREIGN KEY (delivery_id) REFERENCES file_deliveries (id)
-			)`,
+			)`
 		)
 		.run();
 
@@ -395,7 +389,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				challenge_difficulty INTEGER NOT NULL,
 				expires_at INTEGER NOT NULL,
 				created_at INTEGER NOT NULL
-			)`,
+			)`
 		)
 		.run();
 
@@ -405,7 +399,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				token_key TEXT PRIMARY KEY,
 				expires_at INTEGER NOT NULL,
 				created_at INTEGER NOT NULL
-			)`,
+			)`
 		)
 		.run();
 
@@ -416,7 +410,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				failure_count INTEGER NOT NULL,
 				window_started_at INTEGER NOT NULL,
 				updated_at INTEGER NOT NULL
-			)`,
+			)`
 		)
 		.run();
 
@@ -427,7 +421,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				pickup_code_hash TEXT NOT NULL,
 				expires_at INTEGER NOT NULL,
 				created_at INTEGER NOT NULL
-			)`,
+			)`
 		)
 		.run();
 
@@ -442,7 +436,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				created_at INTEGER NOT NULL,
 				ip TEXT,
 				user_agent TEXT
-			)`,
+			)`
 		)
 		.run();
 
@@ -455,7 +449,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				window_started_at INTEGER NOT NULL,
 				locked_until INTEGER,
 				updated_at INTEGER NOT NULL
-			)`,
+			)`
 		)
 		.run();
 
@@ -467,7 +461,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				storage_prefix TEXT NOT NULL,
 				created_at INTEGER NOT NULL,
 				last_activity_at INTEGER NOT NULL
-			)`,
+			)`
 		)
 		.run();
 
@@ -493,7 +487,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				created_at INTEGER NOT NULL,
 				deleted_at INTEGER,
 				FOREIGN KEY (room_code_hash) REFERENCES rooms(code_hash)
-			)`,
+			)`
 		)
 		.run();
 
@@ -505,7 +499,7 @@ async function initializeDatabaseSchema(db: LockerDb) {
 				expires_at INTEGER NOT NULL,
 				created_at INTEGER NOT NULL,
 				FOREIGN KEY (room_code_hash) REFERENCES rooms(code_hash)
-			)`,
+			)`
 		)
 		.run();
 
@@ -738,10 +732,7 @@ export async function createAdminAuthSession(db: LockerDb, adminPassword: string
 }
 
 export async function isSecretEqual(input: string, expected: string) {
-	const [inputBytes, expectedBytes] = await Promise.all([
-		secretDigestBytes(input),
-		secretDigestBytes(expected),
-	]);
+	const [inputBytes, expectedBytes] = await Promise.all([secretDigestBytes(input), secretDigestBytes(expected)]);
 	let difference = inputBytes.length ^ expectedBytes.length;
 
 	for (let index = 0; index < Math.max(inputBytes.length, expectedBytes.length); index += 1) {
@@ -757,7 +748,7 @@ export async function getAuthLockStatus(db: LockerDb, kind: AuthKind, request: R
 		.prepare(
 			`SELECT failure_count, window_started_at, locked_until
 			FROM auth_login_failures
-			WHERE subject_hash = ?`,
+			WHERE subject_hash = ?`
 		)
 		.bind(subjectHash)
 		.first<AuthLoginFailureRow>();
@@ -784,7 +775,7 @@ export async function recordAuthFailure(db: LockerDb, kind: AuthKind, request: R
 		.prepare(
 			`SELECT failure_count, window_started_at
 			FROM auth_login_failures
-			WHERE subject_hash = ?`,
+			WHERE subject_hash = ?`
 		)
 		.bind(subjectHash)
 		.first<AuthLoginFailureRow>();
@@ -792,10 +783,7 @@ export async function recordAuthFailure(db: LockerDb, kind: AuthKind, request: R
 	const isCurrentWindow = row !== null && now - currentWindowStartedAt <= AUTH_FAILURE_WINDOW_MS;
 	const nextFailureCount = isCurrentWindow ? Number(row.failure_count) + 1 : 1;
 	const nextWindowStartedAt = isCurrentWindow ? currentWindowStartedAt : now;
-	const lockedUntil =
-		nextFailureCount >= AUTH_LOCK_THRESHOLD
-			? now + Math.min(AUTH_LOCK_MAX_MS, AUTH_LOCK_BASE_MS * 2 ** (nextFailureCount - AUTH_LOCK_THRESHOLD))
-			: null;
+	const lockedUntil = nextFailureCount >= AUTH_LOCK_THRESHOLD ? now + Math.min(AUTH_LOCK_MAX_MS, AUTH_LOCK_BASE_MS * 2 ** (nextFailureCount - AUTH_LOCK_THRESHOLD)) : null;
 
 	await db
 		.prepare(
@@ -812,7 +800,7 @@ export async function recordAuthFailure(db: LockerDb, kind: AuthKind, request: R
 				failure_count = excluded.failure_count,
 				window_started_at = excluded.window_started_at,
 				locked_until = excluded.locked_until,
-				updated_at = excluded.updated_at`,
+				updated_at = excluded.updated_at`
 		)
 		.bind(subjectHash, kind, nextFailureCount, nextWindowStartedAt, lockedUntil, now)
 		.run();
@@ -831,7 +819,10 @@ export async function clearAuthFailures(db: LockerDb, kind: AuthKind, request: R
 
 export async function cleanupAuthArtifacts(db: LockerDb, now = Date.now()) {
 	await db.prepare("DELETE FROM auth_sessions WHERE expires_at <= ?").bind(now).run();
-	await db.prepare("DELETE FROM auth_login_failures WHERE updated_at <= ?").bind(now - AUTH_FAILURE_RETENTION_MS).run();
+	await db
+		.prepare("DELETE FROM auth_login_failures WHERE updated_at <= ?")
+		.bind(now - AUTH_FAILURE_RETENTION_MS)
+		.run();
 }
 
 export function serializeSiteAuthCookies(session: AuthSession, requestUrl: string) {
@@ -866,16 +857,10 @@ function serializeCookie(
 	options: {
 		httpOnly: boolean;
 		maxAge: number;
-	},
+	}
 ) {
 	const url = new URL(requestUrl);
-	const parts = [
-		`${name}=${value}`,
-		"Path=/",
-		"SameSite=Lax",
-		`Max-Age=${options.maxAge}`,
-		"Priority=High",
-	];
+	const parts = [`${name}=${value}`, "Path=/", "SameSite=Lax", `Max-Age=${options.maxAge}`, "Priority=High"];
 
 	if (options.httpOnly) {
 		parts.push("HttpOnly");
@@ -905,7 +890,7 @@ async function createAuthSession(db: LockerDb, kind: AuthKind, password: string,
 				created_at,
 				ip,
 				user_agent
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 		)
 		.bind(await hashAuthToken(token), kind, await hashAuthPassword(kind, password), csrfToken, expiresAt, now, source.ip, source.userAgent)
 		.run();
@@ -926,7 +911,7 @@ async function validateAuthSession(db: LockerDb, kind: AuthKind, password: strin
 			WHERE token_hash = ?
 				AND auth_kind = ?
 				AND password_hash = ?
-				AND expires_at > ?`,
+				AND expires_at > ?`
 		)
 		.bind(await hashAuthToken(token), kind, await hashAuthPassword(kind, password), now)
 		.first<{ csrf_token: string }>();
@@ -1005,12 +990,11 @@ export async function getPickupPowDifficulty(db: LockerDb, request: Request): Pr
 		.prepare(
 			`SELECT failure_count, window_started_at
 			FROM pickup_pow_failures
-			WHERE subject_hash = ?`,
+			WHERE subject_hash = ?`
 		)
 		.bind(subjectHash)
 		.first<PickupPowFailureRow>();
-	const failureCount =
-		row && now - Number(row.window_started_at) <= PICKUP_FAILURE_WINDOW_MS ? Number(row.failure_count) : 0;
+	const failureCount = row && now - Number(row.window_started_at) <= PICKUP_FAILURE_WINDOW_MS ? Number(row.failure_count) : 0;
 	const tier = getPickupPowTier(failureCount);
 
 	return {
@@ -1028,7 +1012,7 @@ export async function recordPickupPowFailure(db: LockerDb, request: Request, now
 		.prepare(
 			`SELECT failure_count, window_started_at
 			FROM pickup_pow_failures
-			WHERE subject_hash = ?`,
+			WHERE subject_hash = ?`
 		)
 		.bind(subjectHash)
 		.first<PickupPowFailureRow>();
@@ -1048,7 +1032,7 @@ export async function recordPickupPowFailure(db: LockerDb, request: Request, now
 			ON CONFLICT(subject_hash) DO UPDATE SET
 				failure_count = excluded.failure_count,
 				window_started_at = excluded.window_started_at,
-				updated_at = excluded.updated_at`,
+				updated_at = excluded.updated_at`
 		)
 		.bind(subjectHash, nextFailureCount, nextWindowStartedAt, now)
 		.run();
@@ -1070,7 +1054,7 @@ export async function createPickupAccessToken(db: LockerDb, pickupCodeHash: stri
 				pickup_code_hash,
 				expires_at,
 				created_at
-			) VALUES (?, ?, ?, ?)`,
+			) VALUES (?, ?, ?, ?)`
 		)
 		.bind(await hashPickupAccessToken(token), pickupCodeHash, now + PICKUP_ACCESS_MAX_AGE_MS, now)
 		.run();
@@ -1092,7 +1076,7 @@ export async function isPickupAccessTokenValid(db: LockerDb, pickupCodeHash: str
 			FROM pickup_access_tokens
 			WHERE token_hash = ?
 				AND pickup_code_hash = ?
-				AND expires_at > ?`,
+				AND expires_at > ?`
 		)
 		.bind(await hashPickupAccessToken(token), pickupCodeHash, now)
 		.first<{ token_hash: string }>();
@@ -1103,7 +1087,10 @@ export async function isPickupAccessTokenValid(db: LockerDb, pickupCodeHash: str
 export async function cleanupPowArtifacts(db: LockerDb, now = Date.now()) {
 	await deleteExpiredCapArtifacts(db, now);
 	await db.prepare("DELETE FROM pickup_access_tokens WHERE expires_at <= ?").bind(now).run();
-	await db.prepare("DELETE FROM pickup_pow_failures WHERE updated_at <= ?").bind(now - PICKUP_FAILURE_RETENTION_MS).run();
+	await db
+		.prepare("DELETE FROM pickup_pow_failures WHERE updated_at <= ?")
+		.bind(now - PICKUP_FAILURE_RETENTION_MS)
+		.run();
 }
 
 async function deleteExpiredCapArtifacts(db: LockerDb, now: number) {
@@ -1181,7 +1168,7 @@ export async function recordDeliveryEvent(db: LockerDb, input: DeliveryEventInpu
 				next_max_downloads,
 				next_download_count,
 				created_at
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		)
 		.bind(
 			crypto.randomUUID(),
@@ -1201,7 +1188,7 @@ export async function recordDeliveryEvent(db: LockerDb, input: DeliveryEventInpu
 			input.previousDownloadCount ?? null,
 			input.nextMaxDownloads ?? null,
 			input.nextDownloadCount ?? null,
-			input.createdAt ?? Date.now(),
+			input.createdAt ?? Date.now()
 		)
 		.run();
 }
@@ -1286,7 +1273,10 @@ export function getContentType(request: Request) {
 export function createCode(byteLength: number) {
 	const bytes = new Uint8Array(byteLength);
 	crypto.getRandomValues(bytes);
-	return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+	return [...bytes]
+		.map((byte) => byte.toString(16).padStart(2, "0"))
+		.join("")
+		.toUpperCase();
 }
 
 export function createPickupCode() {
@@ -1333,7 +1323,7 @@ export async function findReusableStoredObject(db: LockerDb, bucket: LockerBucke
 				AND (expires_at = ? OR expires_at > ?)
 				AND (max_downloads = ? OR download_count < max_downloads)
 			ORDER BY created_at DESC
-			LIMIT 5`,
+			LIMIT 5`
 		)
 		.bind(contentHash, size, UNLIMITED_EXPIRY, now, UNLIMITED_DOWNLOADS)
 		.all<{ storage_key: string }>();
@@ -1357,7 +1347,7 @@ export async function deleteStoredObjectIfUnreferenced(db: LockerDb, bucket: Loc
 				AND deleted_at IS NULL
 				AND (expires_at = ? OR expires_at > ?)
 				AND (max_downloads = ? OR download_count < max_downloads)
-			LIMIT 1`,
+			LIMIT 1`
 		)
 		.bind(storageKey, UNLIMITED_EXPIRY, now, UNLIMITED_DOWNLOADS)
 		.first<{ id: string }>();

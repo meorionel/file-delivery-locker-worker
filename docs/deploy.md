@@ -36,9 +36,9 @@
 
 这仨分别是:
 
-- ADMIN_PASSWORD      后台管理员密码
-- SITE_PASSWORD       用户访问网站用的密码
-- PICKUP_CODE_PEPPER  生成取件码时的pepper, 你不需要知道这是什么, 你只需要把你的脸放到键盘上然后滚动, 滚出一堆随机长字符串
+- ADMIN_PASSWORD 后台管理员密码
+- SITE_PASSWORD 用户访问网站用的密码
+- PICKUP_CODE_PEPPER 生成取件码时的pepper, 你不需要知道这是什么, 你只需要把你的脸放到键盘上然后滚动, 滚出一堆随机长字符串
 
 ![add secret](./image/add_secret.png)
 

@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 				headers: {
 					"retry-after": String(lock.retryAfterSeconds),
 				},
-			},
+			}
 		);
 	}
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 							"retry-after": String(failure.retryAfterSeconds),
 						},
 					}
-				: 401,
+				: 401
 		);
 	}
 
@@ -68,6 +68,6 @@ export async function POST(request: Request) {
 		{ ok: true },
 		{
 			headers,
-		},
+		}
 	);
 }

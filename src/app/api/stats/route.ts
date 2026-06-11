@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 				`SELECT
 					COUNT(*) AS uploadCount,
 					COALESCE(SUM(download_count), 0) AS downloadCount
-				FROM file_deliveries`,
+				FROM file_deliveries`
 			)
 			.first<StatsRow>();
 	} catch (error) {
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 			JSON.stringify({
 				event: "stats_read_failed",
 				error: error instanceof Error ? error.message : "unknown",
-			}),
+			})
 		);
 		return json({ error: "Unable to read site stats." }, 500);
 	}

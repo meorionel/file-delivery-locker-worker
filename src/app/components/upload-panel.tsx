@@ -73,10 +73,7 @@ export function UploadPanel({
 			return false;
 		}
 
-		return (
-			event.dataTransfer.types.includes("Files") ||
-			(deliveryMode === "text" && event.dataTransfer.types.includes("text/plain"))
-		);
+		return event.dataTransfer.types.includes("Files") || (deliveryMode === "text" && event.dataTransfer.types.includes("text/plain"));
 	}
 
 	function handlePanelDragOver(event: DragEvent<HTMLFormElement>) {
@@ -122,23 +119,11 @@ export function UploadPanel({
 	}
 
 	return (
-		<form
-			className="panel panel-feature flex flex-col gap-6"
-			onDragLeave={handlePanelDragLeave}
-			onDragOver={handlePanelDragOver}
-			onDrop={handlePanelDrop}
-			onSubmit={onSubmit}
-		>
+		<form className="panel panel-feature flex flex-col gap-6" onDragLeave={handlePanelDragLeave} onDragOver={handlePanelDragOver} onDrop={handlePanelDrop} onSubmit={onSubmit}>
 			<div className="flex items-center justify-between gap-4">
 				<div>
 					<h2>{t("upload.title")}</h2>
-					<p className="panel-copy">
-						{demoMode
-							? t("upload.demoCopy")
-							: deliveryMode === "text"
-								? t("upload.textCopy")
-								: selectedFileName ?? t("upload.fileCopy")}
-					</p>
+					<p className="panel-copy">{demoMode ? t("upload.demoCopy") : deliveryMode === "text" ? t("upload.textCopy") : (selectedFileName ?? t("upload.fileCopy"))}</p>
 				</div>
 				<Badge variant="coral">{uploadBadge}</Badge>
 			</div>
@@ -155,16 +140,18 @@ export function UploadPanel({
 			</div>
 
 			{deliveryMode === "text" ? (
-				<div className={`field flex flex-col gap-3 rounded-xl border border-dashed ${isDragActive ? "border-[rgba(204,120,92,0.72)] bg-[var(--surface-soft)]" : "border-transparent"}`}>
+				<div
+					className={`field flex flex-col gap-3 rounded-xl border border-dashed ${isDragActive ? "border-[rgba(204,120,92,0.72)] bg-[var(--surface-soft)]" : "border-transparent"}`}
+				>
 					<textarea
-						className="block h-[230px] max-h-[230px] max-w-full min-h-[230px] overflow-auto resize-none whitespace-pre-wrap break-words w-full"
+						className="block h-[230px] max-h-[230px] min-h-[230px] w-full max-w-full resize-none overflow-auto break-words whitespace-pre-wrap"
 						disabled={demoMode}
 						value={textContent}
 						onChange={(event) => onTextContentChange(event.target.value)}
 						placeholder={t("upload.textPlaceholder")}
 					/>
 					<div className="flex flex-wrap items-center justify-between gap-3">
-						<span className="text-[var(--muted)] text-[13px] leading-[1.4]">{t("upload.dropTextFile")}</span>
+						<span className="text-[13px] leading-[1.4] text-[var(--muted)]">{t("upload.dropTextFile")}</span>
 						<label className="secondary-button inline-flex min-h-9 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-medium">
 							<input
 								accept=".txt,.md,.csv,.json,.log,.xml,.yml,.yaml,text/*,application/json"
@@ -182,14 +169,11 @@ export function UploadPanel({
 				</div>
 			) : (
 				<>
-					<label className={`flex min-h-[230px] flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors duration-[160ms] ${isDragActive ? "border-[var(--primary-active)] bg-[var(--surface-soft)] text-[var(--primary-active)]" : "border-[rgba(204,120,92,0.72)] bg-[var(--canvas)] text-[var(--body-strong)]"} ${demoMode ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:border-[var(--primary-active)] hover:bg-[var(--surface-soft)] hover:text-[var(--primary-active)]"}`}>
-						<input
-							className="sr-only"
-							disabled={demoMode}
-							type="file"
-							onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
-						/>
-						<Icon icon="tabler:cloud-upload" className="text-4xl mb-2" />
+					<label
+						className={`flex min-h-[230px] flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors duration-[160ms] ${isDragActive ? "border-[var(--primary-active)] bg-[var(--surface-soft)] text-[var(--primary-active)]" : "border-[rgba(204,120,92,0.72)] bg-[var(--canvas)] text-[var(--body-strong)]"} ${demoMode ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:border-[var(--primary-active)] hover:bg-[var(--surface-soft)] hover:text-[var(--primary-active)]"}`}
+					>
+						<input className="sr-only" disabled={demoMode} type="file" onChange={(event) => onFileChange(event.target.files?.[0] ?? null)} />
+						<Icon icon="tabler:cloud-upload" className="mb-2 text-4xl" />
 						<span className="font-medium">{demoMode ? t("upload.demoNoUpload") : t("upload.chooseFile")}</span>
 						{demoMode ? null : <span className="text-[13px] text-[var(--muted)]">{t("upload.fileSizeHint")}</span>}
 					</label>
@@ -198,12 +182,7 @@ export function UploadPanel({
 
 			<div className="grid gap-4 sm:grid-cols-2">
 				<FormField label={t("upload.expiry")}>
-					<select
-						className="h-[42px] w-full"
-						disabled={demoMode}
-						value={expiresInHours}
-						onChange={(event) => onExpiresInHoursChange(Number(event.target.value))}
-					>
+					<select className="h-[42px] w-full" disabled={demoMode} value={expiresInHours} onChange={(event) => onExpiresInHoursChange(Number(event.target.value))}>
 						{expiryOptions.map((option) => (
 							<option key={option.value} value={option.value}>
 								{t(option.labelKey)}
@@ -221,12 +200,7 @@ export function UploadPanel({
 							onChange={(event) => onMaxDownloadsInputChange(event.target.value)}
 						/>
 						<label className="inline-flex h-[42px] flex-none items-center gap-2 text-sm">
-							<input
-								checked={maxDownloadsUnlimited}
-								disabled={demoMode}
-								type="checkbox"
-								onChange={(event) => onMaxDownloadsUnlimitedChange(event.target.checked)}
-							/>
+							<input checked={maxDownloadsUnlimited} disabled={demoMode} type="checkbox" onChange={(event) => onMaxDownloadsUnlimitedChange(event.target.checked)} />
 							<span>{t("upload.unlimitedTimes")}</span>
 						</label>
 					</div>
@@ -234,13 +208,7 @@ export function UploadPanel({
 			</div>
 
 			<label className="field inline-flex min-h-[42px] items-start gap-3">
-				<input
-					checked={guestAccessEnabled}
-					className="mt-1"
-					disabled={demoMode}
-					type="checkbox"
-					onChange={(event) => onGuestAccessEnabledChange(event.target.checked)}
-				/>
+				<input checked={guestAccessEnabled} className="mt-1" disabled={demoMode} type="checkbox" onChange={(event) => onGuestAccessEnabledChange(event.target.checked)} />
 				<span className="flex flex-col gap-1">
 					<span>{t("upload.guestAccess")}</span>
 					<small>{t("upload.guestAccessHint")}</small>
@@ -257,9 +225,7 @@ export function UploadPanel({
 					<CodeBlock label={t("upload.pickupCode")} value={uploadResult.pickupCode} onCopy={onCopy} />
 					<CodeBlock label={t("upload.manageCode")} value={uploadResult.manageCode} onCopy={onCopy} />
 					<CodeBlock label={t("upload.pickupUrl")} value={uploadResult.pickupUrl} onCopy={onCopy} wide />
-					{uploadResult.guestDownloadUrl && (
-						<CodeBlock label={t("upload.guestDownloadUrl")} value={uploadResult.guestDownloadUrl} onCopy={onCopy} wide />
-					)}
+					{uploadResult.guestDownloadUrl && <CodeBlock label={t("upload.guestDownloadUrl")} value={uploadResult.guestDownloadUrl} onCopy={onCopy} wide />}
 				</div>
 			)}
 		</form>

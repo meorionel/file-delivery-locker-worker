@@ -62,7 +62,7 @@ export async function GET(request: Request, context: { params: Promise<{ guestTo
 				deleted_at,
 				deleted_reason
 			FROM file_deliveries
-			WHERE guest_access_token_hash = ?`,
+			WHERE guest_access_token_hash = ?`
 		)
 		.bind(await hashGuestAccessToken(token))
 		.first<DeliveryRow>();
@@ -110,7 +110,7 @@ export async function GET(request: Request, context: { params: Promise<{ guestTo
 			WHERE id = ?
 				AND deleted_at IS NULL
 				AND (expires_at = ? OR expires_at > ?)
-				AND (max_downloads = ? OR download_count < max_downloads)`,
+				AND (max_downloads = ? OR download_count < max_downloads)`
 		)
 		.bind(UNLIMITED_DOWNLOADS, now, UNLIMITED_DOWNLOADS, row.id, UNLIMITED_EXPIRY, now, UNLIMITED_DOWNLOADS)
 		.run();
@@ -138,9 +138,9 @@ export async function GET(request: Request, context: { params: Promise<{ guestTo
 					event: "guest_delivery_preview_event_failed",
 					id: row.id,
 					error: error instanceof Error ? error.message : "unknown",
-				}),
+				})
 			);
-		}),
+		})
 	);
 
 	return json({
@@ -150,9 +150,6 @@ export async function GET(request: Request, context: { params: Promise<{ guestTo
 }
 
 async function markDeleted(db: LockerDb, bucket: LockerBucket, row: DeliveryRow, now: number, reason: string) {
-	await db
-		.prepare("UPDATE file_deliveries SET deleted_at = ?, deleted_reason = ? WHERE id = ? AND deleted_at IS NULL")
-		.bind(now, reason, row.id)
-		.run();
+	await db.prepare("UPDATE file_deliveries SET deleted_at = ?, deleted_reason = ? WHERE id = ? AND deleted_at IS NULL").bind(now, reason, row.id).run();
 	await deleteStoredObjectIfUnreferenced(db, bucket, row.storage_key, now);
 }

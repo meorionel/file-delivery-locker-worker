@@ -131,7 +131,7 @@ async function prepareD1Database(databaseName) {
 async function findD1Database(databaseName) {
 	const output = await wrangler(["d1", "list", "--json"]);
 	const databases = parseJsonOutput(output, "wrangler d1 list --json");
-	const list = Array.isArray(databases) ? databases : databases.result ?? [];
+	const list = Array.isArray(databases) ? databases : (databases.result ?? []);
 	const found = list.find((database) => database.name === databaseName);
 	if (!found) {
 		return null;
@@ -146,10 +146,7 @@ async function findD1Database(databaseName) {
 }
 
 async function validateD1Database(databaseName) {
-	const tableRows = await executeD1Json(
-		databaseName,
-		"SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' ORDER BY name",
-	);
+	const tableRows = await executeD1Json(databaseName, "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' ORDER BY name");
 	const tableNames = tableRows.map((row) => row.name).filter(Boolean);
 	if (tableNames.length === 0) {
 		console.log(`D1 database "${databaseName}" is empty; it can be initialized by this project.`);
@@ -179,7 +176,7 @@ async function validateD1Database(databaseName) {
 async function executeD1Json(databaseName, command) {
 	const output = await wrangler(["d1", "execute", databaseName, "--remote", "--json", "--command", command]);
 	const parsed = parseJsonOutput(output, `wrangler d1 execute ${databaseName}`);
-	const firstResult = Array.isArray(parsed) ? parsed[0] : parsed.result?.[0] ?? parsed.result ?? parsed;
+	const firstResult = Array.isArray(parsed) ? parsed[0] : (parsed.result?.[0] ?? parsed.result ?? parsed);
 	return firstResult.results ?? firstResult.result ?? [];
 }
 
@@ -205,9 +202,7 @@ async function wrangler(args) {
 }
 
 function hasR2Bucket(output, bucketName) {
-	return output
-		.split(/\r?\n/)
-		.some((line) => line.trim() === bucketName || line.trim().split(/\s+/).includes(bucketName));
+	return output.split(/\r?\n/).some((line) => line.trim() === bucketName || line.trim().split(/\s+/).includes(bucketName));
 }
 
 async function readWranglerConfig(filePath) {
@@ -261,10 +256,10 @@ function stripJsonComments(input) {
 				escaped = false;
 			} else if (char === "\\") {
 				escaped = true;
-			} else if (char === "\"") {
+			} else if (char === '"') {
 				inString = false;
 			}
-		} else if (char === "\"") {
+		} else if (char === '"') {
 			inString = true;
 		}
 	}
@@ -274,10 +269,12 @@ function stripJsonComments(input) {
 
 function parseJsonOutput(output, label) {
 	const trimmed = output.trim();
-	const start = Math.min(...["[", "{"].map((token) => {
-		const index = trimmed.indexOf(token);
-		return index === -1 ? Number.POSITIVE_INFINITY : index;
-	}));
+	const start = Math.min(
+		...["[", "{"].map((token) => {
+			const index = trimmed.indexOf(token);
+			return index === -1 ? Number.POSITIVE_INFINITY : index;
+		})
+	);
 	if (!Number.isFinite(start)) {
 		throw new Error(`${label} did not return JSON output.`);
 	}

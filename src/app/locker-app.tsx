@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	type FormEvent,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { GooeyToaster, gooeyToast } from "goey-toast";
 import { getDownloadFileName } from "@/lib/file";
 import { csrfHeaders } from "@/lib/csrf";
@@ -15,15 +10,7 @@ import { useI18n } from "./i18n";
 import { AdminPanel } from "./components/admin-panel";
 import { readApiJson } from "./components/api-json";
 import { formatBytes, normalizePickupCode, PICKUP_CODE_LENGTH } from "./components/locker-format";
-import type {
-	ApiError,
-	Delivery,
-	DeliveryKind,
-	DeliveryLookupResult,
-	SiteStats,
-	TextPreview,
-	UploadResult,
-} from "./components/locker-types";
+import type { ApiError, Delivery, DeliveryKind, DeliveryLookupResult, SiteStats, TextPreview, UploadResult } from "./components/locker-types";
 import { PickupPanel } from "./components/pickup-panel";
 import { StatsLockup } from "./components/stats-lockup";
 import { UploadPanel } from "./components/upload-panel";
@@ -357,7 +344,7 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 
 	return (
 		<main className="app-shell min-h-screen">
-			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
+			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 max-sm:gap-8 max-sm:pt-4 min-[960px]:px-10 sm:px-8">
 				<StatsLockup stats={stats} />
 
 				<div className="grid gap-6 min-[960px]:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] min-[960px]:items-start">
@@ -398,12 +385,7 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 							onPickupCodeChange={setPickupCode}
 							onSubmit={lookupDelivery}
 						/>
-						<AdminPanel
-							busy={busy === "revoke"}
-							manageCode={manageCode}
-							onManageCodeChange={setManageCode}
-							onSubmit={revokeDelivery}
-						/>
+						<AdminPanel busy={busy === "revoke"} manageCode={manageCode} onManageCodeChange={setManageCode} onSubmit={revokeDelivery} />
 					</div>
 				</div>
 
@@ -412,4 +394,3 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 		</main>
 	);
 }
-

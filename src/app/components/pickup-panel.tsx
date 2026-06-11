@@ -45,7 +45,7 @@ export function PickupPanel({
 	};
 
 	return (
-		<form className="panel panel-dark flex items-center justify-center flex-col gap-5 h-full" onSubmit={onSubmit}>
+		<form className="panel panel-dark flex h-full flex-col items-center justify-center gap-5" onSubmit={onSubmit}>
 			<div className="w-full">
 				<h2>{t("pickup.title")}</h2>
 				<p className="panel-copy">{t("pickup.copy")}</p>
@@ -62,18 +62,10 @@ export function PickupPanel({
 					<DeliverySummary delivery={delivery} textPreview={textPreview} statusText={statusText} />
 					{delivery.kind === "text" ? (
 						delivery.status === "available" ? (
-							<TextPreviewBlock
-								text={textPreview?.text}
-								remainingDownloads={textPreview?.remainingDownloads}
-								onCopy={onCopy}
-							/>
+							<TextPreviewBlock text={textPreview?.text} remainingDownloads={textPreview?.remainingDownloads} onCopy={onCopy} />
 						) : null
 					) : (
-						<PrimaryButton
-							disabled={delivery.status !== "available" || !pickupAccessToken || downloading}
-							type="button"
-							onClick={onDownload}
-						>
+						<PrimaryButton disabled={delivery.status !== "available" || !pickupAccessToken || downloading} type="button" onClick={onDownload}>
 							<Icon icon="tabler:download" aria-hidden="true" />
 							{downloading ? t("pickup.downloading") : t("pickup.download")}
 						</PrimaryButton>

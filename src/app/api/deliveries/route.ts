@@ -146,7 +146,7 @@ export async function POST(request: Request) {
 					upload_country,
 					upload_region,
 					upload_city
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 			)
 			.bind(
 				id,
@@ -170,7 +170,7 @@ export async function POST(request: Request) {
 				source.device,
 				source.country,
 				source.region,
-				source.city,
+				source.city
 			)
 			.run();
 		await recordDeliveryEvent(db, {
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
 				event: "delivery_create_failed",
 				id,
 				error: error instanceof Error ? error.message : "unknown",
-			}),
+			})
 		);
 		return json({ error: "Unable to store this file." }, 500);
 	}
@@ -199,9 +199,7 @@ export async function POST(request: Request) {
 	const origin = new URL(request.url).origin;
 	const encodedPickupCode = encodeURIComponent(pickup.code);
 	const pickupUrl = `${origin}/?pickupCode=${encodedPickupCode}`;
-	const guestDownloadUrl = guestAccessToken
-		? `${origin}/guest/${encodeURIComponent(guestAccessToken)}`
-		: null;
+	const guestDownloadUrl = guestAccessToken ? `${origin}/guest/${encodeURIComponent(guestAccessToken)}` : null;
 
 	return json(
 		{
@@ -217,6 +215,6 @@ export async function POST(request: Request) {
 			downloadUrl: guestDownloadUrl ?? pickupUrl,
 			guestDownloadUrl,
 		},
-		201,
+		201
 	);
 }

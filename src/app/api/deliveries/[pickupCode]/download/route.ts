@@ -61,7 +61,7 @@ export async function GET(request: Request, context: { params: Promise<{ pickupC
 				deleted_at,
 				deleted_reason
 			FROM file_deliveries
-			WHERE pickup_code_hash = ?`,
+			WHERE pickup_code_hash = ?`
 		)
 		.bind(pickupCodeHash)
 		.first<DeliveryRow>();

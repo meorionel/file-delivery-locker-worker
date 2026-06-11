@@ -60,7 +60,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 				upload_region,
 				upload_city
 			FROM file_deliveries
-			WHERE id = ?`,
+			WHERE id = ?`
 		)
 		.bind(id)
 		.first<DeliveryRow>();
@@ -74,10 +74,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 	}
 
 	const now = Date.now();
-	await db
-		.prepare("UPDATE file_deliveries SET deleted_at = ?, deleted_reason = 'admin_revoked' WHERE id = ? AND deleted_at IS NULL")
-		.bind(now, row.id)
-		.run();
+	await db.prepare("UPDATE file_deliveries SET deleted_at = ?, deleted_reason = 'admin_revoked' WHERE id = ? AND deleted_at IS NULL").bind(now, row.id).run();
 	await deleteStoredObjectIfUnreferenced(db, bucket, row.storage_key, now);
 	await recordDeliveryEvent(db, {
 		deliveryId: row.id,

@@ -141,13 +141,11 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 				<div className="panel panel-feature flex w-full flex-col gap-6 p-[clamp(28px,5vw,48px)] max-sm:p-6">
 					<div className="border-b border-[var(--hairline-soft)] pb-7">
 						<h2 className="text-[44px] leading-[1.08] tracking-[-0.02em] max-sm:text-[34px]">{t("guest.title")}</h2>
-						<p className="panel-copy max-w-[640px] text-[var(--muted)] text-base">{t("guest.copy")}</p>
+						<p className="panel-copy max-w-[640px] text-base text-[var(--muted)]">{t("guest.copy")}</p>
 					</div>
 					{loading ? <p className="panel-copy m-0">{t("guest.loading")}</p> : null}
 					{loadError ? <p className="auth-error">{loadError}</p> : null}
-					{delivery && (
-						<DeliverySummary delivery={delivery} statusText={statusText} variant="guest" />
-					)}
+					{delivery && <DeliverySummary delivery={delivery} statusText={statusText} variant="guest" />}
 					{delivery?.kind === "text" && textPreview && (
 						<TextPreviewBlock
 							text={textPreview.text}
@@ -174,4 +172,3 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 		</main>
 	);
 }
-

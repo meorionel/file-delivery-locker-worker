@@ -81,7 +81,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 				upload_region,
 				upload_city
 			FROM file_deliveries
-			WHERE id = ?`,
+			WHERE id = ?`
 		)
 		.bind(id)
 		.first<DeliveryRow>();
@@ -102,7 +102,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 					download_count = ?,
 					deleted_at = ?,
 					deleted_reason = 'admin_count_limit'
-				WHERE id = ?`,
+				WHERE id = ?`
 			)
 			.bind(maxDownloads, downloadCount, now, row.id)
 			.run();
@@ -112,7 +112,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 			.prepare(
 				`UPDATE file_deliveries
 				SET max_downloads = ?, download_count = ?
-				WHERE id = ?`,
+				WHERE id = ?`
 			)
 			.bind(maxDownloads, downloadCount, row.id)
 			.run();

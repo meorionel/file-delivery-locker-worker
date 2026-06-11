@@ -225,7 +225,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 							deletedReason: "admin_revoked",
 							status: "deleted",
 						}
-					: current,
+					: current
 			);
 			await loadDeliveries();
 		} catch (error) {
@@ -278,20 +278,12 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 							maxDownloads,
 							downloadCount,
 							remainingDownloads: Math.max(0, maxDownloads - downloadCount),
-							status:
-								current.deletedAt === null && current.status === "available" && downloadCount >= maxDownloads
-									? "deleted"
-									: current.status,
-							deletedAt:
-								current.deletedAt === null && current.status === "available" && downloadCount >= maxDownloads
-									? new Date().toISOString()
-									: current.deletedAt,
+							status: current.deletedAt === null && current.status === "available" && downloadCount >= maxDownloads ? "deleted" : current.status,
+							deletedAt: current.deletedAt === null && current.status === "available" && downloadCount >= maxDownloads ? new Date().toISOString() : current.deletedAt,
 							deletedReason:
-								current.deletedAt === null && current.status === "available" && downloadCount >= maxDownloads
-									? "admin_count_limit"
-									: current.deletedReason,
+								current.deletedAt === null && current.status === "available" && downloadCount >= maxDownloads ? "admin_count_limit" : current.deletedReason,
 						}
-					: current,
+					: current
 			);
 			setMessage(t("admin.countsUpdated"));
 			await loadDeliveries();
@@ -304,11 +296,14 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 	return (
 		<main className="app-shell min-h-screen">
-			<section className="mx-auto flex min-h-screen w-full max-w-[1360px] flex-col gap-6 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10">
+			<section className="mx-auto flex min-h-screen w-full max-w-[1360px] flex-col gap-6 px-5 pt-6 pb-16 min-[960px]:px-10 sm:px-8">
 				<header className="flex flex-wrap items-end justify-between gap-4">
 					<div>
-						<h1 className="m-0 font-[var(--font-display)] text-[34px] font-normal leading-tight text-[var(--ink)]">{t("admin.title")}</h1>
-						<p className="panel-copy">{demoMode ? t("admin.demoPrefix") : ""}{t("admin.totalUploads", { total })}</p>
+						<h1 className="m-0 text-[34px] leading-tight font-[var(--font-display)] font-normal text-[var(--ink)]">{t("admin.title")}</h1>
+						<p className="panel-copy">
+							{demoMode ? t("admin.demoPrefix") : ""}
+							{t("admin.totalUploads", { total })}
+						</p>
 					</div>
 					<Link className="secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-sm font-medium no-underline" href="/">
 						{t("admin.backHome")}
@@ -368,35 +363,66 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 						<table className="w-full min-w-[1060px] border-collapse text-left text-sm">
 							<thead>
 								<tr>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerFile")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.status")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerSize")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerCounts")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerCreated")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerExpires")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerSource")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerBrowser")}</th>
-									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerActions")}</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerFile")}
+									</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">{t("admin.status")}</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerSize")}
+									</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerCounts")}
+									</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerCreated")}
+									</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerExpires")}
+									</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerSource")}
+									</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerBrowser")}
+									</th>
+									<th className="border-b border-[var(--hairline)] pr-3 pb-3 text-xs font-semibold whitespace-nowrap text-[var(--muted)]">
+										{t("admin.headerActions")}
+									</th>
 								</tr>
 							</thead>
 							<tbody>
 								{deliveries.map((delivery) => (
 									<tr key={delivery.id}>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">
-											<strong className="block max-w-[220px] break-words text-[var(--ink)] font-semibold">{delivery.fileName}</strong>
-											<span className="block max-w-[220px] break-words text-[var(--muted)] text-xs leading-[1.45] mt-1">{delivery.kind === "text" ? t("admin.kindText") : delivery.contentType}</span>
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">
+											<strong className="block max-w-[220px] font-semibold break-words text-[var(--ink)]">{delivery.fileName}</strong>
+											<span className="mt-1 block max-w-[220px] text-xs leading-[1.45] break-words text-[var(--muted)]">
+												{delivery.kind === "text" ? t("admin.kindText") : delivery.contentType}
+											</span>
 										</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">
 											<span className={`admin-status admin-status-${delivery.status}`}>{statusLabel(delivery.status, t)}</span>
 											{delivery.deletedReason ? <span>{delivery.deletedReason}</span> : null}
 										</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{formatBytes(delivery.size)}</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{delivery.downloadCount}/{delivery.maxDownloads}</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{formatDate(delivery.createdAt, locale)}</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{formatDate(delivery.expiresAt, locale)}</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top" title={delivery.upload.userAgent ?? undefined}>{sourceLocation(delivery.upload, t)}</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{sourceBrowser(delivery.upload, t)}</td>
-										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">{formatBytes(delivery.size)}</td>
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">
+											{delivery.downloadCount}/{delivery.maxDownloads}
+										</td>
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">
+											{formatDate(delivery.createdAt, locale)}
+										</td>
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">
+											{formatDate(delivery.expiresAt, locale)}
+										</td>
+										<td
+											className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]"
+											title={delivery.upload.userAgent ?? undefined}
+										>
+											{sourceLocation(delivery.upload, t)}
+										</td>
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">
+											{sourceBrowser(delivery.upload, t)}
+										</td>
+										<td className="border-b border-[var(--hairline-soft)] pt-3.5 pr-3 pb-3.5 align-top text-[var(--body)]">
 											<div className="flex flex-wrap gap-2">
 												<SecondaryButton className="min-h-9 rounded-lg px-3 text-sm" type="button" onClick={() => loadEvents(delivery)}>
 													{t("admin.events")}
@@ -415,10 +441,20 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 					<div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--hairline)] pt-4">
 						<span className="panel-copy">{t("admin.page", { page, totalPages })}</span>
 						<div className="flex gap-2">
-							<SecondaryButton className="min-h-9 rounded-lg px-4 text-sm" disabled={page <= 1 || busy === "list"} type="button" onClick={() => setPage((value) => Math.max(1, value - 1))}>
+							<SecondaryButton
+								className="min-h-9 rounded-lg px-4 text-sm"
+								disabled={page <= 1 || busy === "list"}
+								type="button"
+								onClick={() => setPage((value) => Math.max(1, value - 1))}
+							>
 								{t("admin.prevPage")}
 							</SecondaryButton>
-							<SecondaryButton className="min-h-9 rounded-lg px-4 text-sm" disabled={page >= totalPages || busy === "list"} type="button" onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
+							<SecondaryButton
+								className="min-h-9 rounded-lg px-4 text-sm"
+								disabled={page >= totalPages || busy === "list"}
+								type="button"
+								onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+							>
 								{t("admin.nextPage")}
 							</SecondaryButton>
 						</div>
@@ -431,18 +467,21 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 					{message ? <p className="auth-error">{message}</p> : null}
 					{busy === "events" ? <p className="panel-copy">{t("common.loading")}</p> : null}
 					{events.map((event) => (
-						<div className="border border-[rgba(250,249,245,0.12)] rounded-lg p-3" key={event.id}>
+						<div className="rounded-lg border border-[rgba(250,249,245,0.12)] p-3" key={event.id}>
 							<div className="flex items-center justify-between gap-3">
-								<strong className="text-[var(--on-dark)] text-sm">{actionLabel(event.action, t)}</strong>
-								<span className="text-[var(--on-dark-soft)] text-xs leading-[1.5]">{formatDate(event.createdAt, locale)}</span>
+								<strong className="text-sm text-[var(--on-dark)]">{actionLabel(event.action, t)}</strong>
+								<span className="text-xs leading-[1.5] text-[var(--on-dark-soft)]">{formatDate(event.createdAt, locale)}</span>
 							</div>
-							<p className="text-[var(--on-dark-soft)] text-xs leading-[1.5] mt-1.5 break-words">{sourceLocation(event.source, t)} · {sourceBrowser(event.source, t)}</p>
+							<p className="mt-1.5 text-xs leading-[1.5] break-words text-[var(--on-dark-soft)]">
+								{sourceLocation(event.source, t)} · {sourceBrowser(event.source, t)}
+							</p>
 							{event.previousMaxDownloads !== null || event.nextMaxDownloads !== null ? (
-								<p className="text-[var(--on-dark-soft)] text-xs leading-[1.5] mt-1.5 break-words">
-									{t("admin.headerCounts")} {event.previousDownloadCount ?? "-"} / {event.previousMaxDownloads ?? "-"} → {event.nextDownloadCount ?? "-"} / {event.nextMaxDownloads ?? "-"}
+								<p className="mt-1.5 text-xs leading-[1.5] break-words text-[var(--on-dark-soft)]">
+									{t("admin.headerCounts")} {event.previousDownloadCount ?? "-"} / {event.previousMaxDownloads ?? "-"} → {event.nextDownloadCount ?? "-"} /{" "}
+									{event.nextMaxDownloads ?? "-"}
 								</p>
 							) : null}
-							{event.note ? <p className="text-[var(--on-dark-soft)] text-xs leading-[1.5] mt-1.5 break-words">{event.note}</p> : null}
+							{event.note ? <p className="mt-1.5 text-xs leading-[1.5] break-words text-[var(--on-dark-soft)]">{event.note}</p> : null}
 						</div>
 					))}
 					{events.length === 0 && busy !== "events" ? <p className="panel-copy">{t("common.noEvents")}</p> : null}
@@ -476,7 +515,9 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 					</div>
 					<div className="rounded-lg border border-[var(--hairline)] p-4 text-sm text-[var(--muted)]">
 						<p className="m-0">{actionDelivery && t("admin.currentStatus", { status: statusLabel(actionDelivery.status, t) })}</p>
-						<p className="m-0 mt-2">{actionDelivery && t("admin.currentCounts", { downloadCount: actionDelivery.downloadCount, maxDownloads: actionDelivery.maxDownloads })}</p>
+						<p className="m-0 mt-2">
+							{actionDelivery && t("admin.currentCounts", { downloadCount: actionDelivery.downloadCount, maxDownloads: actionDelivery.maxDownloads })}
+						</p>
 						{actionDelivery?.deletedReason ? <p className="m-0 mt-2">{t("admin.deletedReason", { reason: actionDelivery.deletedReason })}</p> : null}
 					</div>
 					<div className="flex flex-wrap justify-between gap-3 border-t border-[var(--hairline)] pt-4">
@@ -491,11 +532,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 							<SecondaryButton type="button" onClick={() => setActionDelivery(null)}>
 								{t("common.close")}
 							</SecondaryButton>
-							<PrimaryButton
-								disabled={demoMode || busy === "counts"}
-								type="button"
-								onClick={() => actionDelivery && saveCounts(actionDelivery)}
-							>
+							<PrimaryButton disabled={demoMode || busy === "counts"} type="button" onClick={() => actionDelivery && saveCounts(actionDelivery)}>
 								{busy === "counts" ? t("admin.saving") : t("admin.saveCounts")}
 							</PrimaryButton>
 						</div>

@@ -1,10 +1,4 @@
-import {
-	type DeliveryRow,
-	getCloudflareBindings,
-	hashGuestAccessToken,
-	json,
-	serializeDelivery,
-} from "@/lib/locker";
+import { type DeliveryRow, getCloudflareBindings, hashGuestAccessToken, json, serializeDelivery } from "@/lib/locker";
 
 export async function GET(_request: Request, context: { params: Promise<{ guestToken: string }> }) {
 	const { db } = await getCloudflareBindings();
@@ -39,7 +33,7 @@ export async function GET(_request: Request, context: { params: Promise<{ guestT
 				deleted_at,
 				deleted_reason
 			FROM file_deliveries
-			WHERE guest_access_token_hash = ?`,
+			WHERE guest_access_token_hash = ?`
 		)
 		.bind(await hashGuestAccessToken(token))
 		.first<DeliveryRow>();

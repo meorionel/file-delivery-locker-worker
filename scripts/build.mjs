@@ -12,9 +12,9 @@ const args = process.env.NEXT_PRIVATE_STANDALONE === "true" ? ["build"] : ["buil
 const bin = path.join(root, "node_modules", ".bin", isWindows ? `${command}.cmd` : command);
 
 execFileSync(bin, args, {
-  cwd: root,
-  env: process.env,
-  stdio: "inherit",
+	cwd: root,
+	env: process.env,
+	stdio: "inherit",
 });
 
 // After OpenNext build, ensure the worker-entry.mjs can resolve imports.

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-	type ClipboardEvent,
-	type KeyboardEvent,
-	useRef,
-} from "react";
+import { type ClipboardEvent, type KeyboardEvent, useRef } from "react";
 import { useI18n } from "../i18n";
 import { PICKUP_CODE_LENGTH, normalizePickupCode } from "./locker-format";
 
@@ -72,7 +68,7 @@ export function PickupCodeInput({ onChange, value, disabled = false }: { onChang
 			<div className="grid grid-cols-6 gap-2" role="group">
 				{chars.map((char, index) => (
 					<input
-						className="min-w-0 p-0 text-center font-[var(--font-code)] text-lg font-semibold uppercase"
+						className="min-w-0 p-0 text-center text-lg font-[var(--font-code)] font-semibold uppercase"
 						aria-label={t("pickup.charLabel", { index: index + 1 })}
 						autoCapitalize="characters"
 						autoComplete={index === 0 ? "one-time-code" : "off"}

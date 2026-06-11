@@ -1,13 +1,4 @@
-import {
-	deleteStoredObjectIfUnreferenced,
-	type DeliveryRow,
-	getCloudflareBindings,
-	hashManageCode,
-	json,
-	requireCsrf,
-	requireSiteAuth,
-	requireWritableMode,
-} from "@/lib/locker";
+import { deleteStoredObjectIfUnreferenced, type DeliveryRow, getCloudflareBindings, hashManageCode, json, requireCsrf, requireSiteAuth, requireWritableMode } from "@/lib/locker";
 
 export async function DELETE(request: Request, context: { params: Promise<{ manageCode: string }> }) {
 	const readonly = await requireWritableMode();
@@ -52,7 +43,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ mana
 				deleted_at,
 				deleted_reason
 			FROM file_deliveries
-			WHERE manage_code_hash = ?`,
+			WHERE manage_code_hash = ?`
 		)
 		.bind(manageCodeHash)
 		.first<DeliveryRow>();
@@ -66,10 +57,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ mana
 	}
 
 	const now = Date.now();
-	await db
-		.prepare("UPDATE file_deliveries SET deleted_at = ?, deleted_reason = 'revoked' WHERE id = ? AND deleted_at IS NULL")
-		.bind(now, row.id)
-		.run();
+	await db.prepare("UPDATE file_deliveries SET deleted_at = ?, deleted_reason = 'revoked' WHERE id = ? AND deleted_at IS NULL").bind(now, row.id).run();
 	await deleteStoredObjectIfUnreferenced(db, bucket, row.storage_key, now);
 
 	return json({ ok: true, deleted: true });

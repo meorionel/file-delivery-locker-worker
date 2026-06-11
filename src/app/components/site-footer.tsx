@@ -12,9 +12,7 @@ export function SiteFooter() {
 				<div className="flex max-w-[520px] items-start gap-3.5">
 					<img src="/logo.webp" alt="logo" className="w-16" />
 					<div>
-						<strong className="block text-[22px] leading-[1.3] font-medium text-[var(--on-dark)]">
-							{t("footer.brand")}
-						</strong>
+						<strong className="block text-[22px] leading-[1.3] font-medium text-[var(--on-dark)]">{t("footer.brand")}</strong>
 						<p className="mt-2 mb-0 text-sm leading-[1.55]">{t("footer.copy")}</p>
 					</div>
 				</div>
@@ -23,7 +21,11 @@ export function SiteFooter() {
 			</div>
 			<div className="mx-auto mt-10 mb-0 max-w-[1200px] border-t border-[rgba(250,249,245,0.1)] pt-5 text-sm leading-[1.55]">
 				<ul>
-					<li><a href="https://github.com/meorionel/file-delivery-locker-worker" className="hover:border-b border-[rgba(250,249,245,0.1)]">Open Source</a></li>
+					<li>
+						<a href="https://github.com/meorionel/file-delivery-locker-worker" className="border-[rgba(250,249,245,0.1)] hover:border-b">
+							Open Source
+						</a>
+					</li>
 				</ul>
 			</div>
 		</div>

@@ -1,10 +1,4 @@
-import {
-	type DeliveryRow,
-	getCloudflareBindings,
-	hashGuestAccessToken,
-	json,
-	validatePickupPowToken,
-} from "@/lib/locker";
+import { type DeliveryRow, getCloudflareBindings, hashGuestAccessToken, json, validatePickupPowToken } from "@/lib/locker";
 import { createDeliveryDownloadResponse } from "../../../download-response";
 
 export async function GET(request: Request, context: { params: Promise<{ guestToken: string }> }) {
@@ -49,7 +43,7 @@ export async function GET(request: Request, context: { params: Promise<{ guestTo
 				deleted_at,
 				deleted_reason
 			FROM file_deliveries
-			WHERE guest_access_token_hash = ?`,
+			WHERE guest_access_token_hash = ?`
 		)
 		.bind(await hashGuestAccessToken(token))
 		.first<DeliveryRow>();

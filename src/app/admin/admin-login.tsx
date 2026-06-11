@@ -44,7 +44,7 @@ export default function AdminLogin() {
 
 	return (
 		<main className="app-shell min-h-screen">
-			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-center gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10">
+			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-center gap-10 px-5 pt-6 pb-16 min-[960px]:px-10 sm:px-8">
 				<form className="panel panel-feature flex w-[min(100%,420px)] flex-col gap-5" onSubmit={enterAdmin}>
 					<h2>{t("admin.title")}</h2>
 					<FormField label={t("auth.adminPassword")}>

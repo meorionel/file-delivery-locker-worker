@@ -1,13 +1,6 @@
 "use client";
 
-import {
-	createContext,
-	type ReactNode,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 export type Language = "zh" | "en";
 
@@ -486,11 +479,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 		document.title = window.location.pathname.startsWith("/admin") ? value.t("admin.metaTitle") : value.t("site.title");
 	}, [hasLoadedLanguage, language, value]);
 
-	return (
-		<I18nContext.Provider value={value}>
-			{children}
-		</I18nContext.Provider>
-	);
+	return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
 export function useI18n() {
