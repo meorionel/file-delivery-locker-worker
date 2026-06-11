@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getDemoMode, getSiteAuthSession, getSitePassword, SITE_AUTH_COOKIE } from "@/lib/locker";
 import LockerApp from "./locker-app";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
 	const demoMode = await getDemoMode();
 	if (demoMode) {
