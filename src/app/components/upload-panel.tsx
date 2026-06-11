@@ -143,7 +143,7 @@ export function UploadPanel({
 				<Badge variant="coral">{uploadBadge}</Badge>
 			</div>
 
-			<div className="flex justify-center w-full">
+			<div className="flex w-full">
 				<Switch
 					checked={deliveryMode === "text"}
 					onChange={() => onDeliveryModeChange(deliveryMode === "text" ? "file" : "text")}
@@ -155,7 +155,7 @@ export function UploadPanel({
 			</div>
 
 			{deliveryMode === "text" ? (
-				<div className={`field flex flex-col gap-3 rounded-xl border border-dashed p-2.5 ${isDragActive ? "border-[rgba(204,120,92,0.72)] bg-[var(--surface-soft)]" : "border-transparent"}`}>
+				<div className={`field flex flex-col gap-3 rounded-xl border border-dashed ${isDragActive ? "border-[rgba(204,120,92,0.72)] bg-[var(--surface-soft)]" : "border-transparent"}`}>
 					<textarea
 						className="block h-[230px] max-h-[230px] max-w-full min-h-[230px] overflow-auto resize-none whitespace-pre-wrap break-words w-full"
 						disabled={demoMode}
@@ -181,16 +181,19 @@ export function UploadPanel({
 					</div>
 				</div>
 			) : (
-				<label className={`flex min-h-[230px] flex-col items-center justify-center gap-2.5 rounded-xl border-2 border-dashed transition-colors duration-[160ms] ${isDragActive ? "border-[var(--primary-active)] bg-[var(--surface-soft)] text-[var(--primary-active)]" : "border-[rgba(204,120,92,0.72)] bg-[var(--canvas)] text-[var(--body-strong)]"} ${demoMode ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:border-[var(--primary-active)] hover:bg-[var(--surface-soft)] hover:text-[var(--primary-active)]"}`}>
-					<input
-						className="sr-only"
-						disabled={demoMode}
-						type="file"
-						onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
-					/>
-					<Icon icon="tabler:file-plus" className="text-4xl" />
-					<span className="font-medium">{demoMode ? t("upload.demoNoUpload") : t("upload.chooseFile")}</span>
-				</label>
+				<>
+					<label className={`flex min-h-[230px] flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors duration-[160ms] ${isDragActive ? "border-[var(--primary-active)] bg-[var(--surface-soft)] text-[var(--primary-active)]" : "border-[rgba(204,120,92,0.72)] bg-[var(--canvas)] text-[var(--body-strong)]"} ${demoMode ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:border-[var(--primary-active)] hover:bg-[var(--surface-soft)] hover:text-[var(--primary-active)]"}`}>
+						<input
+							className="sr-only"
+							disabled={demoMode}
+							type="file"
+							onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+						/>
+						<Icon icon="tabler:cloud-upload" className="text-4xl mb-2" />
+						<span className="font-medium">{demoMode ? t("upload.demoNoUpload") : t("upload.chooseFile")}</span>
+						{demoMode ? null : <span className="text-[13px] text-[var(--muted)]">{t("upload.fileSizeHint")}</span>}
+					</label>
+				</>
 			)}
 
 			<div className="grid gap-4 sm:grid-cols-2">

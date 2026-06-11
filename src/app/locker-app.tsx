@@ -360,31 +360,31 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-10 px-5 pt-6 pb-16 sm:px-8 min-[960px]:px-10 max-sm:gap-8 max-sm:pt-4">
 				<StatsLockup stats={stats} />
 
-				<div className="grid flex-1 gap-6">
-					<div className="grid gap-6 min-[960px]:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] min-[960px]:items-start">
-						<UploadPanel
-							busy={busy === "upload"}
-							demoMode={demoMode}
-							deliveryMode={deliveryMode}
-							expiresInHours={expiresInHours}
-							guestAccessEnabled={guestAccessEnabled}
-							maxDownloadsInput={maxDownloadsInput}
-							maxDownloadsUnlimited={maxDownloadsUnlimited}
-							selectedFileName={file?.name ?? null}
-							textContent={textContent}
-							uploadBadge={uploadBadge}
-							uploadResult={uploadResult}
-							onCopy={copy}
-							onDeliveryModeChange={setDeliveryMode}
-							onExpiresInHoursChange={setExpiresInHours}
-							onFileChange={setFile}
-							onGuestAccessEnabledChange={setGuestAccessEnabled}
-							onMaxDownloadsInputChange={setMaxDownloadsInput}
-							onMaxDownloadsUnlimitedChange={setMaxDownloadsUnlimited}
-							onSubmit={uploadDelivery}
-							onTextContentChange={setTextContent}
-							onTextFileChange={importTextFile}
-						/>
+				<div className="grid gap-6 min-[960px]:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] min-[960px]:items-start">
+					<UploadPanel
+						busy={busy === "upload"}
+						demoMode={demoMode}
+						deliveryMode={deliveryMode}
+						expiresInHours={expiresInHours}
+						guestAccessEnabled={guestAccessEnabled}
+						maxDownloadsInput={maxDownloadsInput}
+						maxDownloadsUnlimited={maxDownloadsUnlimited}
+						selectedFileName={file?.name ?? null}
+						textContent={textContent}
+						uploadBadge={uploadBadge}
+						uploadResult={uploadResult}
+						onCopy={copy}
+						onDeliveryModeChange={setDeliveryMode}
+						onExpiresInHoursChange={setExpiresInHours}
+						onFileChange={setFile}
+						onGuestAccessEnabledChange={setGuestAccessEnabled}
+						onMaxDownloadsInputChange={setMaxDownloadsInput}
+						onMaxDownloadsUnlimitedChange={setMaxDownloadsUnlimited}
+						onSubmit={uploadDelivery}
+						onTextContentChange={setTextContent}
+						onTextFileChange={importTextFile}
+					/>
+					<div className="grid gap-6">
 						<PickupPanel
 							busy={busy === "lookup"}
 							delivery={delivery}
@@ -398,14 +398,13 @@ export default function LockerApp({ csrfToken = null, demoMode = false }: Locker
 							onPickupCodeChange={setPickupCode}
 							onSubmit={lookupDelivery}
 						/>
+						<AdminPanel
+							busy={busy === "revoke"}
+							manageCode={manageCode}
+							onManageCodeChange={setManageCode}
+							onSubmit={revokeDelivery}
+						/>
 					</div>
-
-					<AdminPanel
-						busy={busy === "revoke"}
-						manageCode={manageCode}
-						onManageCodeChange={setManageCode}
-						onSubmit={revokeDelivery}
-					/>
 				</div>
 
 				<GooeyToaster closeButton="top-right" position="bottom-right" preset="subtle" showProgress visibleToasts={3} />

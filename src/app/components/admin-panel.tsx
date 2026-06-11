@@ -4,7 +4,6 @@ import type { FormEvent } from "react";
 import { Icon } from "@iconify/react";
 import { useI18n } from "../i18n";
 import { DangerButton } from "@/app/components/ui/button";
-import { FormField } from "@/app/components/ui/form-field";
 
 type AdminPanelProps = {
 	busy: boolean;
@@ -17,24 +16,26 @@ export function AdminPanel({ busy, manageCode, onManageCodeChange, onSubmit }: A
 	const { t } = useI18n();
 
 	return (
-		<form className="panel bg-[var(--surface-soft)] flex flex-col gap-5 w-full" onSubmit={onSubmit}>
+		<form className="panel bg-[var(--surface-soft)] flex flex-col gap-3 w-full self-start" onSubmit={onSubmit}>
 			<div>
 				<h2>{t("admin.manageTitle")}</h2>
 				<p className="panel-copy">{t("admin.manageCopy")}</p>
 			</div>
-			<FormField label={t("admin.manageCode")}>
-				<input
-					className="h-[42px] w-full"
-					autoCapitalize="characters"
-					value={manageCode}
-					onChange={(event) => onManageCodeChange(event.target.value.toUpperCase())}
-					placeholder={t("admin.managePlaceholder")}
-				/>
-			</FormField>
-			<DangerButton disabled={busy} type="submit">
-				<Icon icon="tabler:trash" aria-hidden="true" />
-				{busy ? t("admin.revoking") : t("admin.revokeFile")}
-			</DangerButton>
+			<div className="flex gap-2">
+				<div className="field flex flex-col gap-2 flex-1">
+					<input
+						className="h-[42px] w-full"
+						autoCapitalize="characters"
+						value={manageCode}
+						onChange={(event) => onManageCodeChange(event.target.value.toUpperCase())}
+						placeholder={t("admin.managePlaceholder")}
+					/>
+				</div>
+				<DangerButton disabled={busy} type="submit">
+					<Icon icon="tabler:trash" aria-hidden="true" />
+					{busy ? t("admin.revoking") : t("admin.revokeFile")}
+				</DangerButton>
+			</div>
 		</form>
 	);
 }
