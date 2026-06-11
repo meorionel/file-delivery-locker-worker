@@ -207,7 +207,14 @@ function hasR2Bucket(output, bucketName) {
 
 async function readWranglerConfig(filePath) {
 	const raw = await readFile(filePath, "utf8");
-	return JSON.parse(stripJsonComments(raw));
+	const stripped = stripJsonComments(raw);
+	const clean = stripTrailingCommas(stripped);
+	return JSON.parse(clean);
+}
+
+function stripTrailingCommas(input) {
+	// Remove trailing commas before closing } or ] (including across whitespace/newlines)
+	return input.replaceAll(/,([\s\n\r]*[}\]])/g, "$1");
 }
 
 function stripJsonComments(input) {
