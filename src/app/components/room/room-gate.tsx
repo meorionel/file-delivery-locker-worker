@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
+import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/app/i18n";
 import { readApiJson } from "@/app/components/api-json";
@@ -139,41 +140,46 @@ export function RoomGate({ demoMode }: Props) {
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
       <form className="flex flex-col gap-4" onSubmit={handleJoin}>
-        <div className="field flex w-full flex-col gap-2">
-          <span className="text-sm">{t("room.roomCode")}</span>
-          <div className="grid grid-cols-6 gap-2" role="group">
-            {chars.map((char, index) => (
-              <input
-                key={index}
-                ref={(element) => { inputRefs.current[index] = element; }}
-                className="min-w-0 p-0 text-center text-lg font-semibold tracking-widest uppercase"
-                value={char}
-                maxLength={1}
-                disabled={joining || demoMode}
-                autoCapitalize="characters"
-                autoComplete="off"
-                inputMode="text"
-                type="text"
-                onChange={(event) => updateFrom(index, event.target.value)}
-                onKeyDown={(event) => handleKeyDown(index, event)}
-                onPaste={(event) => handlePaste(index, event)}
-              />
-            ))}
+        <div className="panel panel-feature flex w-full flex-col gap-4">
+          <div className="field flex w-full flex-col gap-2">
+            <span className="text-sm">{t("room.roomCode")}</span>
+            <div className="grid grid-cols-6 gap-2" role="group">
+              {chars.map((char, index) => (
+                <input
+                  key={index}
+                  ref={(element) => { inputRefs.current[index] = element; }}
+                  className="min-w-0 p-0 text-center text-lg font-semibold tracking-widest uppercase"
+                  value={char}
+                  maxLength={1}
+                  disabled={joining || demoMode}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  inputMode="text"
+                  type="text"
+                  onChange={(event) => updateFrom(index, event.target.value)}
+                  onKeyDown={(event) => handleKeyDown(index, event)}
+                  onPaste={(event) => handlePaste(index, event)}
+                />
+              ))}
+            </div>
           </div>
+          <PrimaryButton
+            type="submit"
+            disabled={joining || demoMode || joinCode.length !== 6}
+          >
+            {joining ? t("room.joining") : <>{t("room.joinRoom")}<Icon icon="tabler:arrow-narrow-right" /></>}
+          </PrimaryButton>
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-black/10" />
+            <span className="text-sm text-[var(--muted)]">OR</span>
+            <div className="h-px flex-1 bg-black/10" />
+          </div>
+
+          <PrimaryButton type="button" disabled={creating || demoMode} onClick={handleCreate}>
+            {creating ? t("room.creating") : t("room.createRoom")}
+          </PrimaryButton>
         </div>
-        <PrimaryButton
-          type="submit"
-          disabled={joining || demoMode || joinCode.length !== 6}
-        >
-          {joining ? t("room.joining") : t("room.joinRoom")}
-        </PrimaryButton>
       </form>
-
-      <div className="h-px bg-black/10" />
-
-      <PrimaryButton type="button" disabled={creating || demoMode} onClick={handleCreate}>
-        {creating ? t("room.creating") : t("room.createRoom")}
-      </PrimaryButton>
 
       {error && <p className="auth-error text-center">{error}</p>}
     </div>

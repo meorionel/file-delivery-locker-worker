@@ -18,16 +18,20 @@ export function RoomFileList({ files, onDownload, onPreview }: Props) {
   }
 
   return (
-    <div className="room-file-list">
-      <div className="room-file-header">
-        <span className="room-file-name">{t("room.fileName")}</span>
-        <span className="room-file-kind">{t("room.fileType")}</span>
-        <span className="room-file-size">{t("admin.headerSize")}</span>
-        <span className="room-file-time">{t("room.uploadTime")}</span>
-      </div>
-      {files.map((f) => (
-        <RoomFileItem key={f.id} file={f} onDownload={onDownload} onPreview={onPreview} />
-      ))}
-    </div>
+    <table className="room-file-table">
+      <thead>
+        <tr>
+          <th className="room-file-th-name">{t("room.fileName")}</th>
+          <th className="room-file-th-type">Type</th>
+          <th className="room-file-th-size">{t("admin.headerSize")}</th>
+          <th className="room-file-th-time">{t("room.uploadTime")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {files.map((f) => (
+          <RoomFileItem key={f.id} file={f} onDownload={onDownload} onPreview={onPreview} />
+        ))}
+      </tbody>
+    </table>
   );
 }

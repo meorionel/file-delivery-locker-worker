@@ -102,43 +102,47 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
   }
 
   return (
-    <div className="sticky bottom-0 bg-[var(--surface-dark)] border-t border-[rgba(250,249,245,0.1)] py-3 z-50">
-      <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3 px-5 sm:px-8 min-[960px]:px-10">
+    <div className="sticky bottom-0 bg-[var(--canvas)] border-t border-[var(--hairline)] py-3 z-50">
+      <div className="mx-auto flex w-full max-w-[1200px] items-start gap-6 px-5 sm:px-8 min-[960px]:px-10">
         <button
           type="button"
-          className="flex-none w-10 h-10 rounded-full border-0 bg-[var(--primary)] text-[var(--on-primary)] text-xs font-semibold cursor-pointer flex items-center justify-center transition-colors duration-[120ms] leading-none hover:bg-[var(--primary-active)]"
+          className="flex-none w-10 h-10 rounded-full border-0 bg-[var(--primary)] text-[var(--on-primary)] cursor-pointer flex items-center justify-center transition-colors duration-[120ms] leading-none hover:bg-[var(--primary-active)]"
           onClick={toggleKind}
           title={kind === "file" ? t("room.uploadText") : t("room.uploadFile")}
         >
-          {kind === "file" ? t("room.uploadFile").slice(0, 2) : t("room.uploadText").slice(0, 2)}
+          <Icon icon={kind === "file" ? "tabler:file-text" : "tabler:file"} className="text-lg" />
         </button>
 
-        <form className="flex flex-1 items-center gap-3" onSubmit={handleUpload}>
+        <form className="flex flex-1 items-start gap-6" onSubmit={handleUpload}>
           {kind === "text" ? (
-            <input
-              className="flex-1 min-w-0 h-10 border border-[rgba(250,249,245,0.12)] rounded-lg bg-[var(--surface-dark-elevated)] text-[var(--on-dark)] px-3.5 text-sm outline-none focus:border-[var(--primary)] focus:shadow-[0_0_0_3px_rgba(204,120,92,0.15)] placeholder:text-[var(--on-dark-soft)]"
-              type="text"
+            <textarea
+              className="flex-1 min-w-0 h-10 border-2 border-dashed border-[var(--hairline)] rounded-xl bg-[var(--canvas)] text-[var(--ink)] px-4 py-3 text-sm outline-none resize-none focus:border-[var(--primary)] placeholder:text-[var(--muted-soft)] transition-colors duration-[120ms]"
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
               placeholder={t("upload.textPlaceholder")}
               disabled={uploading}
             />
           ) : (
-            <label className="flex-1 min-w-0 h-10 flex items-center border border-[rgba(250,249,245,0.12)] rounded-lg bg-[var(--surface-dark-elevated)] px-3.5 cursor-pointer transition-colors duration-[120ms] hover:border-[rgba(250,249,245,0.2)]">
+            <label className="flex-1 min-w-0 h-10 flex items-center justify-between px-4 border-2 border-dashed border-[var(--hairline)] rounded-xl bg-[var(--canvas)] cursor-pointer transition-colors duration-[120ms] hover:border-[var(--primary)] hover:bg-[var(--surface-soft)]">
               <input
                 ref={fileInputRef}
                 type="file"
                 className="sr-only"
                 onChange={handleFileChange}
               />
-              <span className={selectedFile ? "" : "text-[var(--on-dark-soft)]"}>
-                {selectedFile ? selectedFile.name : t("upload.chooseFile")}
-              </span>
+              {selectedFile ? (
+                <span className="text-sm text-[var(--ink)]">{selectedFile.name}</span>
+              ) : (
+                <>
+                  <span className="text-sm text-[var(--muted)]">{t("upload.chooseFile")}</span>
+                  <Icon icon="tabler:cloud-upload" className="text-xl text-[var(--muted)]" />
+                </>
+              )}
             </label>
           )}
 
           <PrimaryButton type="submit" disabled={uploading}>
-            {uploading ? t("upload.uploading") : <Icon icon="tabler:arrow-up" />}
+            {uploading ? t("upload.uploading") : <><Icon icon="tabler:send" />Send</>}
           </PrimaryButton>
         </form>
       </div>

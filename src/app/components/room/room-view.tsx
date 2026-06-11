@@ -174,38 +174,38 @@ export function RoomView({ roomCode, joinToken }: Props) {
       ? t("room.clients", { count: userCount })
       : status === "rest-fallback"
         ? "REST"
-        : t("room.connecting");
+        : status === "disconnected" || status === "error"
+          ? "DISCONNECT"
+          : t("room.connecting");
 
   return (
     <div className="flex h-screen flex-col">
       <div className="mx-auto w-full max-w-[1200px] px-5 pt-6 sm:px-8 min-[960px]:px-10">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <button className="inline-flex items-center justify-center h-7 px-2.5 rounded-md border border-[var(--hairline)] bg-transparent text-[var(--muted)] text-xs font-medium cursor-pointer transition-all duration-[120ms] whitespace-nowrap leading-none hover:bg-[var(--surface-soft)] hover:text-[var(--ink)]" onClick={handleExitRoom} title={t("room.exitRoom")}>
-                <Icon icon="tabler:door-exit" />
-                {t("room.exitRoom")}
-              </button>
-              <button className="inline-flex items-center justify-center h-7 px-2.5 rounded-md border border-[var(--hairline)] bg-transparent text-[var(--muted)] text-xs font-medium cursor-pointer transition-all duration-[120ms] whitespace-nowrap leading-none hover:bg-[var(--surface-soft)] hover:text-[var(--ink)]" onClick={handleCopyCode} title={t("room.copyCode")}>
-                <Icon icon="tabler:copy" />
-                {t("room.copyCode")}
-              </button>
-            </div>
             <h2 className="font-[var(--font-display)] text-[28px] font-normal tracking-[-0.011em] leading-[1.2] m-0">
-              {t("room.roomCode")}: <strong>{roomCode}</strong>
+              <strong>{roomCode}</strong>
             </h2>
             <span className={`room-status room-status-${status}`}>
+              <span className={`room-status-dot room-status-dot-${status}`} />
               {statusText}
             </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button className="inline-flex items-center justify-center h-7 px-2.5 rounded-md border border-[var(--hairline)] bg-transparent text-[var(--muted)] text-xs font-medium cursor-pointer transition-all duration-[120ms] whitespace-nowrap leading-none hover:bg-[var(--surface-soft)] hover:text-[var(--ink)]" onClick={handleCopyCode} title={t("room.copyCode")}>
+              <Icon icon="tabler:copy" className="mr-1" />
+              {t("room.copyCode")}
+            </button>
+            <button className="inline-flex items-center justify-center h-7 px-2.5 rounded-md border border-[var(--hairline)] bg-transparent text-[var(--error)] text-xs font-medium cursor-pointer transition-all duration-[120ms] whitespace-nowrap leading-none hover:bg-[var(--error)]/10" onClick={handleExitRoom} title={t("room.exitRoom")}>
+              <Icon icon="tabler:door-exit" className="mr-1" />
+              {t("room.exitRoom")}
+            </button>
           </div>
         </div>
       </div>
 
       <div ref={listRef} className="mx-auto w-full max-w-[1200px] flex-1 overflow-y-auto px-5 pb-4 sm:px-8 min-[960px]:px-10">
-        <div className="panel panel-dark mt-6 flex flex-col gap-5">
-          <h2>{t("room.fileList")}</h2>
-          <RoomFileList files={files} onDownload={handleDownload} onPreview={handlePreview} />
-        </div>
+        <RoomFileList files={files} onDownload={handleDownload} onPreview={handlePreview} />
       </div>
 
       <RoomUploadBar roomCode={roomCode} joinToken={joinToken} onUploaded={requestSync} />
