@@ -296,7 +296,7 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 	return (
 		<main className="app-shell min-h-screen">
-			<section className="mx-auto flex min-h-screen w-full max-w-[1360px] flex-col gap-6 px-5 pt-6 pb-16 min-[960px]:px-10 sm:px-8">
+			<section className="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col gap-6 px-5 pt-6 pb-16 min-[960px]:px-10 sm:px-8">
 				<header className="flex flex-wrap items-end justify-between gap-4">
 					<div>
 						<h1 className="m-0 text-[34px] leading-tight font-[var(--font-display)] font-normal text-[var(--ink)]">{t("admin.title")}</h1>
