@@ -90,7 +90,7 @@ async function main() {
 		migrations: [
 			{
 				tag: "v1",
-				new_classes: ["Room"],
+				new_sqlite_classes: ["Room"],
 			},
 		],
 	};
