@@ -179,19 +179,19 @@ export function RoomView({ roomCode, joinToken }: Props) {
   return (
     <div className="flex h-screen flex-col">
       <div className="mx-auto w-full max-w-[1200px] px-5 pt-6 sm:px-8 min-[960px]:px-10">
-        <div className="room-header">
-          <div className="room-header-info">
-            <div className="room-header-actions">
-              <button className="room-header-action-btn" onClick={handleExitRoom} title={t("room.exitRoom")}>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <button className="inline-flex items-center justify-center h-7 px-2.5 rounded-md border border-[var(--hairline)] bg-transparent text-[var(--muted)] text-xs font-medium cursor-pointer transition-all duration-[120ms] whitespace-nowrap leading-none hover:bg-[var(--surface-soft)] hover:text-[var(--ink)]" onClick={handleExitRoom} title={t("room.exitRoom")}>
                 <Icon icon="tabler:door-exit" />
                 {t("room.exitRoom")}
               </button>
-              <button className="room-header-action-btn" onClick={handleCopyCode} title={t("room.copyCode")}>
+              <button className="inline-flex items-center justify-center h-7 px-2.5 rounded-md border border-[var(--hairline)] bg-transparent text-[var(--muted)] text-xs font-medium cursor-pointer transition-all duration-[120ms] whitespace-nowrap leading-none hover:bg-[var(--surface-soft)] hover:text-[var(--ink)]" onClick={handleCopyCode} title={t("room.copyCode")}>
                 <Icon icon="tabler:copy" />
                 {t("room.copyCode")}
               </button>
             </div>
-            <h2 className="room-title">
+            <h2 className="font-[var(--font-display)] text-[28px] font-normal tracking-[-0.011em] leading-[1.2] m-0">
               {t("room.roomCode")}: <strong>{roomCode}</strong>
             </h2>
             <span className={`room-status room-status-${status}`}>

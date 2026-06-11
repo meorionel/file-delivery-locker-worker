@@ -365,38 +365,38 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 
 				<section className="panel flex min-w-0 flex-col gap-4 overflow-hidden">
 					<div className="overflow-x-auto">
-						<table className="admin-table w-full min-w-[1060px] border-collapse text-left text-sm">
+						<table className="w-full min-w-[1060px] border-collapse text-left text-sm">
 							<thead>
 								<tr>
-									<th>{t("admin.headerFile")}</th>
-									<th>{t("admin.status")}</th>
-									<th>{t("admin.headerSize")}</th>
-									<th>{t("admin.headerCounts")}</th>
-									<th>{t("admin.headerCreated")}</th>
-									<th>{t("admin.headerExpires")}</th>
-									<th>{t("admin.headerSource")}</th>
-									<th>{t("admin.headerBrowser")}</th>
-									<th>{t("admin.headerActions")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerFile")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.status")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerSize")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerCounts")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerCreated")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerExpires")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerSource")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerBrowser")}</th>
+									<th className="border-b border-[var(--hairline)] text-[var(--muted)] text-xs font-semibold pb-3 pr-3 whitespace-nowrap">{t("admin.headerActions")}</th>
 								</tr>
 							</thead>
 							<tbody>
 								{deliveries.map((delivery) => (
 									<tr key={delivery.id}>
-										<td>
-											<strong>{delivery.fileName}</strong>
-											<span>{delivery.kind === "text" ? t("admin.kindText") : delivery.contentType}</span>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">
+											<strong className="block max-w-[220px] break-words text-[var(--ink)] font-semibold">{delivery.fileName}</strong>
+											<span className="block max-w-[220px] break-words text-[var(--muted)] text-xs leading-[1.45] mt-1">{delivery.kind === "text" ? t("admin.kindText") : delivery.contentType}</span>
 										</td>
-										<td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">
 											<span className={`admin-status admin-status-${delivery.status}`}>{statusLabel(delivery.status, t)}</span>
 											{delivery.deletedReason ? <span>{delivery.deletedReason}</span> : null}
 										</td>
-										<td>{formatBytes(delivery.size)}</td>
-										<td>{delivery.downloadCount}/{delivery.maxDownloads}</td>
-										<td>{formatDate(delivery.createdAt, locale)}</td>
-										<td>{formatDate(delivery.expiresAt, locale)}</td>
-										<td title={delivery.upload.userAgent ?? undefined}>{sourceLocation(delivery.upload, t)}</td>
-										<td>{sourceBrowser(delivery.upload, t)}</td>
-										<td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{formatBytes(delivery.size)}</td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{delivery.downloadCount}/{delivery.maxDownloads}</td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{formatDate(delivery.createdAt, locale)}</td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{formatDate(delivery.expiresAt, locale)}</td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top" title={delivery.upload.userAgent ?? undefined}>{sourceLocation(delivery.upload, t)}</td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">{sourceBrowser(delivery.upload, t)}</td>
+										<td className="border-b border-[var(--hairline-soft)] text-[var(--body)] pr-3 pt-3.5 pb-3.5 align-top">
 											<div className="flex flex-wrap gap-2">
 												<SecondaryButton className="min-h-9 rounded-lg px-3 text-sm" type="button" onClick={() => loadEvents(delivery)}>
 													{t("admin.events")}
@@ -431,18 +431,18 @@ export default function AdminApp({ csrfToken, demoMode = false }: AdminAppProps)
 					{message ? <p className="auth-error">{message}</p> : null}
 					{busy === "events" ? <p className="panel-copy">{t("common.loading")}</p> : null}
 					{events.map((event) => (
-						<div className="admin-event" key={event.id}>
+						<div className="border border-[rgba(250,249,245,0.12)] rounded-lg p-3" key={event.id}>
 							<div className="flex items-center justify-between gap-3">
-								<strong>{actionLabel(event.action, t)}</strong>
-								<span>{formatDate(event.createdAt, locale)}</span>
+								<strong className="text-[var(--on-dark)] text-sm">{actionLabel(event.action, t)}</strong>
+								<span className="text-[var(--on-dark-soft)] text-xs leading-[1.5]">{formatDate(event.createdAt, locale)}</span>
 							</div>
-							<p>{sourceLocation(event.source, t)} · {sourceBrowser(event.source, t)}</p>
+							<p className="text-[var(--on-dark-soft)] text-xs leading-[1.5] mt-1.5 break-words">{sourceLocation(event.source, t)} · {sourceBrowser(event.source, t)}</p>
 							{event.previousMaxDownloads !== null || event.nextMaxDownloads !== null ? (
-								<p>
+								<p className="text-[var(--on-dark-soft)] text-xs leading-[1.5] mt-1.5 break-words">
 									{t("admin.headerCounts")} {event.previousDownloadCount ?? "-"} / {event.previousMaxDownloads ?? "-"} → {event.nextDownloadCount ?? "-"} / {event.nextMaxDownloads ?? "-"}
 								</p>
 							) : null}
-							{event.note ? <p>{event.note}</p> : null}
+							{event.note ? <p className="text-[var(--on-dark-soft)] text-xs leading-[1.5] mt-1.5 break-words">{event.note}</p> : null}
 						</div>
 					))}
 					{events.length === 0 && busy !== "events" ? <p className="panel-copy">{t("common.noEvents")}</p> : null}

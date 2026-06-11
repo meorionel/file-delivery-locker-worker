@@ -68,12 +68,12 @@ export function PickupCodeInput({ onChange, value, disabled = false }: { onChang
 	}
 
 	return (
-		<div className="field pickup-code-field flex flex-col gap-2">
+		<div className="field flex flex-col gap-2">
 			<span id="pickup-code-label">{t("pickup.inputLabel")}</span>
 			<div aria-labelledby="pickup-code-label" className="grid grid-cols-6 gap-2" role="group">
 				{chars.map((char, index) => (
 					<input
-						className="min-w-0 p-0 text-center"
+						className="min-w-0 p-0 text-center font-[var(--font-code)] text-lg font-semibold uppercase"
 						aria-label={t("pickup.charLabel", { index: index + 1 })}
 						autoCapitalize="characters"
 						autoComplete={index === 0 ? "one-time-code" : "off"}

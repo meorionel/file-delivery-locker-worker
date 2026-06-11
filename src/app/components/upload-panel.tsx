@@ -123,7 +123,7 @@ export function UploadPanel({
 
 	return (
 		<form
-			className={`panel panel-feature flex flex-col gap-6 ${isDragActive ? "is-drag-active" : ""}`}
+			className="panel panel-feature flex flex-col gap-6"
 			onDragLeave={handlePanelDragLeave}
 			onDragOver={handlePanelDragOver}
 			onDrop={handlePanelDrop}
@@ -155,16 +155,16 @@ export function UploadPanel({
 			</div>
 
 			{deliveryMode === "text" ? (
-				<div className={`text-dropzone field flex flex-col gap-3 ${isDragActive ? "is-drag-active" : ""}`}>
+				<div className={`field flex flex-col gap-3 rounded-xl border border-dashed p-2.5 ${isDragActive ? "border-[rgba(204,120,92,0.72)] bg-[var(--surface-soft)]" : "border-transparent"}`}>
 					<textarea
-						className="h-[230px] w-full resize-none"
+						className="block h-[230px] max-h-[230px] max-w-full min-h-[230px] overflow-auto resize-none whitespace-pre-wrap break-words w-full"
 						disabled={demoMode}
 						value={textContent}
 						onChange={(event) => onTextContentChange(event.target.value)}
 						placeholder={t("upload.textPlaceholder")}
 					/>
 					<div className="flex flex-wrap items-center justify-between gap-3">
-						<span className="text-dropzone-hint">{t("upload.dropTextFile")}</span>
+						<span className="text-[var(--muted)] text-[13px] leading-[1.4]">{t("upload.dropTextFile")}</span>
 						<label className="secondary-button inline-flex min-h-9 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-medium">
 							<input
 								accept=".txt,.md,.csv,.json,.log,.xml,.yml,.yaml,text/*,application/json"
@@ -181,7 +181,7 @@ export function UploadPanel({
 					</div>
 				</div>
 			) : (
-				<label className={`dropzone flex min-h-[230px] flex-col items-center justify-center gap-2.5 ${demoMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}>
+				<label className={`flex min-h-[230px] flex-col items-center justify-center gap-2.5 rounded-xl border-2 border-dashed transition-colors duration-[160ms] ${isDragActive ? "border-[var(--primary-active)] bg-[var(--surface-soft)] text-[var(--primary-active)]" : "border-[rgba(204,120,92,0.72)] bg-[var(--canvas)] text-[var(--body-strong)]"} ${demoMode ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:border-[var(--primary-active)] hover:bg-[var(--surface-soft)] hover:text-[var(--primary-active)]"}`}>
 					<input
 						className="sr-only"
 						disabled={demoMode}

@@ -17,7 +17,7 @@ export function AdminPanel({ busy, manageCode, onManageCodeChange, onSubmit }: A
 	const { t } = useI18n();
 
 	return (
-		<form className="panel admin-panel flex flex-col gap-5 w-full" onSubmit={onSubmit}>
+		<form className="panel bg-[var(--surface-soft)] flex flex-col gap-5 w-full" onSubmit={onSubmit}>
 			<div>
 				<h2>{t("admin.manageTitle")}</h2>
 				<p className="panel-copy">{t("admin.manageCopy")}</p>

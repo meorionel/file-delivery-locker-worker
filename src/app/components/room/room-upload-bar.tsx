@@ -102,11 +102,11 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
   }
 
   return (
-    <div className="room-chat-bar">
+    <div className="sticky bottom-0 bg-[var(--surface-dark)] border-t border-[rgba(250,249,245,0.1)] py-3 z-50">
       <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3 px-5 sm:px-8 min-[960px]:px-10">
         <button
           type="button"
-          className="room-chat-toggle"
+          className="flex-none w-10 h-10 rounded-full border-0 bg-[var(--primary)] text-[var(--on-primary)] text-xs font-semibold cursor-pointer flex items-center justify-center transition-colors duration-[120ms] leading-none hover:bg-[var(--primary-active)]"
           onClick={toggleKind}
           title={kind === "file" ? t("room.uploadText") : t("room.uploadFile")}
         >
@@ -116,7 +116,7 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
         <form className="flex flex-1 items-center gap-3" onSubmit={handleUpload}>
           {kind === "text" ? (
             <input
-              className="room-chat-input"
+              className="flex-1 min-w-0 h-10 border border-[rgba(250,249,245,0.12)] rounded-lg bg-[var(--surface-dark-elevated)] text-[var(--on-dark)] px-3.5 text-sm outline-none focus:border-[var(--primary)] focus:shadow-[0_0_0_3px_rgba(204,120,92,0.15)] placeholder:text-[var(--on-dark-soft)]"
               type="text"
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
@@ -124,14 +124,14 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
               disabled={uploading}
             />
           ) : (
-            <label className="room-chat-file-label">
+            <label className="flex-1 min-w-0 h-10 flex items-center border border-[rgba(250,249,245,0.12)] rounded-lg bg-[var(--surface-dark-elevated)] px-3.5 cursor-pointer transition-colors duration-[120ms] hover:border-[rgba(250,249,245,0.2)]">
               <input
                 ref={fileInputRef}
                 type="file"
                 className="sr-only"
                 onChange={handleFileChange}
               />
-              <span className={selectedFile ? "" : "room-chat-file-placeholder"}>
+              <span className={selectedFile ? "" : "text-[var(--on-dark-soft)]"}>
                 {selectedFile ? selectedFile.name : t("upload.chooseFile")}
               </span>
             </label>
@@ -143,7 +143,7 @@ export function RoomUploadBar({ roomCode, joinToken, onUploaded }: Props) {
         </form>
       </div>
 
-      {error && <p className="room-chat-error">{error}</p>}
+      {error && <p className="mt-2 text-[var(--error)] text-[13px] text-center px-4">{error}</p>}
     </div>
   );
 }

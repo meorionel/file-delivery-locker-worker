@@ -27,14 +27,14 @@ export function DeliverySummary({ delivery, textPreview, statusText, variant = "
 
   const isGuest = variant === "guest";
   const containerClass = isGuest
-    ? "guest-delivery-summary flex flex-col gap-4"
-    : "delivery-box flex flex-col gap-4";
-  const fileNameClass = isGuest ? "guest-file-name truncate" : "truncate font-semibold";
+    ? "flex flex-col gap-4"
+    : "min-w-0 w-full border-t border-[rgba(250,249,245,0.1)] pt-[18px] flex flex-col gap-4";
+  const fileNameClass = isGuest ? "m-0 text-[var(--ink)] text-xl font-medium leading-[1.35] truncate" : "truncate font-semibold";
   const statusPillClass = isGuest
     ? `status-pill guest-status-pill guest-status-${delivery.status} flex-none rounded-full px-2.5 py-[5px]`
     : "status-pill flex-none rounded-full px-2.5 py-[5px]";
   const gridClass = isGuest
-    ? "guest-meta-grid grid grid-cols-2 gap-3 text-sm"
+    ? "grid grid-cols-2 gap-3 text-sm"
     : "grid grid-cols-2 gap-3 text-sm";
 
   return (
@@ -42,7 +42,7 @@ export function DeliverySummary({ delivery, textPreview, statusText, variant = "
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className={fileNameClass}>{delivery.fileName}</p>
-          <p className="panel-copy">{formatBytes(delivery.size)}</p>
+          <p className="panel-copy mt-1">{formatBytes(delivery.size)}</p>
         </div>
         <span className={statusPillClass}>
           {statusLabel}

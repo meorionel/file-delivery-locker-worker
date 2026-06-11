@@ -136,12 +136,12 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 	}
 
 	return (
-		<main className="app-shell guest-page min-h-screen">
+		<main className="app-shell min-h-screen bg-[linear-gradient(180deg,var(--canvas),var(--surface-soft)_66%,var(--canvas))]">
 			<section className="mx-auto flex min-h-screen w-full max-w-[860px] flex-col items-center justify-center gap-8 px-5 pt-8 pb-16 sm:px-8">
-				<div className="panel panel-feature guest-panel flex w-full flex-col gap-6">
-					<div className="guest-header">
-						<h2>{t("guest.title")}</h2>
-						<p className="panel-copy">{t("guest.copy")}</p>
+				<div className="panel panel-feature flex w-full flex-col gap-6 p-[clamp(28px,5vw,48px)] max-sm:p-6">
+					<div className="border-b border-[var(--hairline-soft)] pb-7">
+						<h2 className="text-[44px] leading-[1.08] tracking-[-0.02em] max-sm:text-[34px]">{t("guest.title")}</h2>
+						<p className="panel-copy max-w-[640px] text-[var(--muted)] text-base">{t("guest.copy")}</p>
 					</div>
 					{loading ? <p className="panel-copy m-0">{t("guest.loading")}</p> : null}
 					{loadError ? <p className="auth-error">{loadError}</p> : null}
@@ -159,7 +159,7 @@ export default function GuestDownloadPage({ guestToken }: GuestDownloadPageProps
 						/>
 					)}
 					<PrimaryButton
-						className="guest-action"
+						className="min-h-12 text-base"
 						disabled={busy || loading || !delivery || delivery.status !== "available"}
 						type="button"
 						onClick={openGuestDelivery}

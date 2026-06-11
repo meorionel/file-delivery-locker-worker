@@ -3,13 +3,7 @@ import { LanguageProvider } from "./i18n";
 import { ModeNavSwitch } from "./components/mode-nav-switch";
 import { SiteFooter } from "./components/site-footer";
 import "./globals.css";
-import "./styles/layout.css";
-import "./styles/panels.css";
-import "./styles/stats.css";
-import "./styles/forms.css";
-import "./styles/buttons.css";
-import "./styles/delivery.css";
-import "./styles/room.css";
+import "./public.css";
 import "./goey-toast.css";
 
 export const metadata: Metadata = {
